@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#160F08">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Platform | Product Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#160F08;--bg2:#1E1510;--surface:#221A10;--surface2:#2A2018;
+  --border:#3A3020;--text:#EFE8DB;--muted:#A99D8A;--dim:#6D6254;
+  --gold:#F5A000;--red:#C44055;--green:#4DFF9A;--blue:#6BA8C8;
+  --mono:"DM Mono",ui-monospace,monospace;
+  --display:"DM Serif Display",Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15px;line-height:1.65;min-height:100vh;-webkit-font-smoothing:antialiased}
+.header{position:sticky;top:0;z-index:10;height:60px;padding:0 36px;background:rgba(22,15,8,.96);border-bottom:2px solid var(--gold);display:flex;align-items:center;justify-content:space-between}
+.brand{font-family:var(--display);font-size:1.35rem}
+.brand em{color:var(--red);font-style:italic}
+.header-right{display:flex;align-items:center;gap:14px}
+.badge{background:var(--gold);color:#160F08;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px}
+.back{color:var(--muted);border:1px solid var(--border);text-decoration:none;font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:6px 12px;transition:color .15s}
+.back:hover{color:var(--text)}
+.hero{max-width:980px;margin:0 auto;padding:80px 36px 56px;border-bottom:1px solid var(--border)}
+.eyebrow{color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;margin-bottom:20px}
+.hero h1{font-family:var(--display);font-size:clamp(2.4rem,5vw,4rem);line-height:1.05;margin-bottom:24px;max-width:800px}
+.hero h1 em{color:var(--red);font-style:italic}
+.hero p{max-width:760px;color:var(--muted);font-size:16px}
+.hero strong{color:var(--text)}
+.main{max-width:980px;margin:0 auto;padding:0 36px 80px}
+.section{padding:56px 0;border-bottom:1px solid var(--border)}
+.section:last-child{border-bottom:none}
+.section-label{color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;margin-bottom:22px}
+.section h2{font-family:var(--display);font-size:2rem;line-height:1.15;margin-bottom:14px}
+.section-intro{max-width:760px;color:var(--muted);margin-bottom:28px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:var(--surface);border:1px solid var(--border);padding:24px}
+.card-label{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.16em;margin-bottom:10px;font-weight:700}
+.card h3{font-family:var(--display);font-size:1.55rem;margin-bottom:10px}
+.card p{color:var(--muted);font-size:13px}
+.card ul{margin-top:16px;padding-left:18px;color:var(--muted);font-size:13px}
+.card li{margin-bottom:7px}
+.tag{display:inline-block;margin-top:16px;font-size:10px;text-transform:uppercase;letter-spacing:.12em;padding:4px 9px;border:1px solid var(--border);color:var(--gold)}
+.two-col{display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:start}
+.simple-list{display:flex;flex-direction:column;gap:12px}
+.list-item{background:var(--surface);border:1px solid var(--border);padding:16px}
+.list-item strong{display:block;color:var(--text);margin-bottom:4px;font-size:13px}
+.list-item span{display:block;color:var(--muted);font-size:12px}
+.round-box{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);margin:26px 0}
+.round-step{background:var(--surface);padding:20px;text-align:center}
+.round-step strong{display:block;font-family:var(--display);font-size:2rem;color:var(--gold);line-height:1;margin-bottom:8px}
+.round-step span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.12em}
+.market-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.market{background:var(--surface);border:1px solid var(--border);padding:16px}
+.market strong{display:block;color:var(--text);margin-bottom:5px}
+.market span{display:block;color:var(--muted);font-size:12px}
+.feed-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.feed{background:var(--surface);border:1px solid var(--border);padding:16px}
+.feed strong{display:block;color:var(--gold);margin-bottom:6px}
+.feed span{display:block;color:var(--muted);font-size:12px}
+.status{display:flex;flex-direction:column;gap:8px}
+.status-row{background:var(--surface);border:1px solid var(--border);padding:12px 14px;display:flex;justify-content:space-between;gap:14px;font-size:12px}
+.status-row span:first-child{color:var(--text)}
+.status-row span:last-child{color:var(--gold)}
+/* train */
+.train-section{background:var(--bg2);border-top:1px solid var(--border);padding:32px 36px;overflow:hidden;position:relative}
+.train-track{position:relative;height:52px;max-width:980px;margin:0 auto;overflow:hidden}
+.track-rail-top{position:absolute;top:20px;left:0;right:0;height:2px;background:var(--border)}
+.track-rail-bot{position:absolute;top:40px;left:0;right:0;height:2px;background:var(--border)}
+.track-sleepers{position:absolute;top:16px;left:0;right:0;height:32px;display:flex;gap:18px;overflow:hidden}
+.track-sleeper{width:3px;background:var(--surface2);flex-shrink:0}
+.train-wrap{position:absolute;top:8px;animation:trainRoll 3.5s linear infinite}
+@keyframes trainRoll{from{left:-420px}to{left:calc(100% + 20px)}}
+.train-lbl{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.footer{max-width:980px;margin:0 auto;padding:30px 36px;border-top:1px solid var(--border);display:flex;justify-content:space-between;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+@media(max-width:800px){
+  .header{padding:0 20px}.header-right{gap:8px}.badge{display:none}
+  .hero{padding:56px 20px 42px}.main{padding:0 20px 60px}
+  .grid-3,.two-col,.feed-grid,.market-grid{grid-template-columns:1fr}
+  .round-box{grid-template-columns:1fr}
+  .train-section{padding:24px 20px}
+  .footer{padding:24px 20px;flex-direction:column;gap:8px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="brand">The <em>Platform</em></div>
+  <div class="header-right">
+    <span class="badge">Product Overview</span>
+    <a class="back" href="platform_v1.html#lobby">Back to Demo</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="eyebrow">Live data betting &middot; Rail markets &middot; Fixed odds</div>
+  <h1>Real train movements turned into <em>live betting markets</em></h1>
+  <p>
+    <strong>The Platform</strong> is a rail-based betting product built around real UK train data.
+    It works in three formats: betting on one long-distance service, betting across the wider network,
+    or betting on live movements at a single busy station.
+  </p>
+</section>
+
+<main class="main">
+
+  <section class="section">
+    <div class="section-label">The three products</div>
+    <h2>One idea, three ways to play.</h2>
+    <p class="section-intro">
+      The product is easiest to understand as three connected formats. Each one uses train movement data,
+      but each creates a different type of betting experience.
+    </p>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-label">01</div>
+        <h3>The Journey</h3>
+        <p>A named train journey from one city to another. Players bet on what happens at checkpoints along the route.</p>
+        <ul>
+          <li>Example: Edinburgh to London</li>
+          <li>Checkpoint stations</li>
+          <li>Delay bands</li>
+          <li>Direction and timing markets</li>
+        </ul>
+        <span class="tag">Route-based</span>
+      </div>
+      <div class="card">
+        <div class="card-label">02</div>
+        <h3>The Network</h3>
+        <p>A wider pool of live services. Players build an accumulator from several train events across the network.</p>
+        <ul>
+          <li>3 to 5 legs</li>
+          <li>Different trains</li>
+          <li>Staggered settlement</li>
+          <li>Familiar to sports bettors</li>
+        </ul>
+        <span class="tag">Acca-style</span>
+      </div>
+      <div class="card">
+        <div class="card-label">03</div>
+        <h3>The Station</h3>
+        <p>A fast live game based on what arrives, passes or stops at one busy station in the next few minutes.</p>
+        <ul>
+          <li>Example: Milton Keynes Central</li>
+          <li>Short betting windows</li>
+          <li>Live settlement</li>
+          <li>Best fit for real-time play</li>
+        </ul>
+        <span class="tag">Core live product</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">The Journey</div>
+    <div class="two-col">
+      <div>
+        <h2>Betting on one train from start to finish.</h2>
+        <p class="section-intro">
+          The Journey follows a single long-distance service. The player is not betting on a whole sport or a whole station.
+          They are following one train as it moves through a route.
+        </p>
+        <p class="section-intro">
+          This gives the product a clear story. The train leaves, reaches checkpoints, gains or loses time,
+          and settles markets as it moves.
+        </p>
+      </div>
+      <div class="simple-list">
+        <div class="list-item">
+          <strong>Player question</strong>
+          <span>Will this train be early, on time or late at the next checkpoint?</span>
+        </div>
+        <div class="list-item">
+          <strong>Possible markets</strong>
+          <span>Delay band, arrival time, first checkpoint on time, final station delay.</span>
+        </div>
+        <div class="list-item">
+          <strong>Best use</strong>
+          <span>Longer-form play with a clear route and a story the player can follow.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">The Network</div>
+    <div class="two-col">
+      <div>
+        <h2>An accumulator built from live train events.</h2>
+        <p class="section-intro">
+          The Network takes the familiar betting accumulator format and applies it to rail.
+          Instead of picking football teams, the player picks outcomes from several live train services.
+        </p>
+        <p class="section-intro">
+          This format is broader than The Journey. It does not rely on one route. It uses a pool of live services
+          and lets the player combine several outcomes into one bet.
+        </p>
+      </div>
+      <div class="simple-list">
+        <div class="list-item">
+          <strong>Player question</strong>
+          <span>Can I pick several train outcomes correctly in one combined bet?</span>
+        </div>
+        <div class="list-item">
+          <strong>Possible markets</strong>
+          <span>Train A late, Train B on time, Train C arrives before a set time.</span>
+        </div>
+        <div class="list-item">
+          <strong>Best use</strong>
+          <span>A familiar betting format that operators and players already understand.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">The Station</div>
+    <div class="two-col">
+      <div>
+        <h2>The strongest live-data product.</h2>
+        <p class="section-intro">
+          The Station is the simplest and most immediate version of The Platform. A busy station is selected.
+          Players bet on what will happen in the next live window.
+        </p>
+        <p class="section-intro">
+          The screen becomes a live betting board. Trains arrive, pass, stop or use specific platforms.
+          Outcomes settle as the data confirms what happened.
+        </p>
+      </div>
+      <div class="simple-list">
+        <div class="list-item">
+          <strong>Player question</strong>
+          <span>What will happen at this station in the next few minutes?</span>
+        </div>
+        <div class="list-item">
+          <strong>Possible markets</strong>
+          <span>Total trains, stopping vs passing, direction split, platform use, freight appears.</span>
+        </div>
+        <div class="list-item">
+          <strong>Best use</strong>
+          <span>Fast, repeatable rounds with live settlement and high replay value.</span>
+        </div>
+      </div>
+    </div>
+    <div class="round-box">
+      <div class="round-step"><strong>60s</strong><span>Bets open</span></div>
+      <div class="round-step"><strong>60s</strong><span>Live window</span></div>
+      <div class="round-step"><strong>20s</strong><span>Results</span></div>
+    </div>
+    <div class="market-grid">
+      <div class="market"><strong>Total trains</strong><span>How many trains will move through the station?</span></div>
+      <div class="market"><strong>Stopping vs passing</strong><span>Will more trains stop, pass through, or will it be equal?</span></div>
+      <div class="market"><strong>Direction split</strong><span>Will more trains go towards London or away from London?</span></div>
+      <div class="market"><strong>Freight appears</strong><span>Will a freight movement appear in the live window?</span></div>
+      <div class="market"><strong>First arrival direction</strong><span>Which direction will the first train of the round travel?</span></div>
+      <div class="market"><strong>Platform market</strong><span>Will a specific platform be used this round?</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Data and settlement</div>
+    <h2>The data makes the product credible.</h2>
+    <p class="section-intro">
+      The Station version uses live rail feeds to predict, display and settle the markets.
+      The aim is to avoid guesswork and settle against verifiable movement data.
+    </p>
+    <div class="feed-grid">
+      <div class="feed">
+        <strong>Darwin</strong>
+        <span>Real-time ETAs, platform assignments, stopping vs passing classification. Updated continuously via the National Rail Push Port feed.</span>
+      </div>
+      <div class="feed">
+        <strong>TRUST</strong>
+        <span>Authoritative confirmation of actual train movements to the millisecond. Primary settlement source of record.</span>
+      </div>
+      <div class="feed">
+        <strong>Train Describer</strong>
+        <span>Physical train position tracked through signalling berths. Confirms location independent of schedule data.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Commercial model</div>
+    <div class="two-col">
+      <div>
+        <h2>Built for operators, not direct to players.</h2>
+        <p class="section-intro">
+          The Platform is best positioned as a B2B game supplied to licensed operators through an aggregator.
+          The operator gets a new live-data betting product. The Platform earns through a revenue share on GGR.
+        </p>
+        <p class="section-intro">
+          The Station should lead the pitch because it is the clearest, fastest and easiest format to demonstrate.
+          The Journey and The Network sit around it as additional product formats for operators wanting broader coverage.
+        </p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- TRAIN -->
+<div class="train-section">
+  <div class="train-track">
+    <div class="track-rail-top"></div>
+    <div class="track-rail-bot"></div>
+    <div class="track-sleepers" id="sleepers"></div>
+    <div class="train-wrap">
+      <!-- Modern Pendolino-style tilting train, nose-forward, 5 carriages -->
+      <svg width="400" height="40" viewBox="0 0 400 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Motion blur lines behind train -->
+        <line x1="0" y1="16" x2="60" y2="16" stroke="rgba(245,160,0,0.08)" stroke-width="1.5"/>
+        <line x1="0" y1="20" x2="80" y2="20" stroke="rgba(245,160,0,0.12)" stroke-width="1"/>
+        <line x1="0" y1="24" x2="50" y2="24" stroke="rgba(245,160,0,0.06)" stroke-width="1.5"/>
+        <!-- Carriage 5 rear -->
+        <rect x="60" y="12" width="56" height="16" rx="1" fill="#2A2018" stroke="rgba(245,160,0,0.25)" stroke-width=".8"/>
+        <rect x="65" y="16" width="9" height="6" rx="1" fill="rgba(245,160,0,0.1)" stroke="rgba(245,160,0,0.2)" stroke-width=".5"/>
+        <rect x="78" y="16" width="9" height="6" rx="1" fill="rgba(245,160,0,0.1)" stroke="rgba(245,160,0,0.2)" stroke-width=".5"/>
+        <rect x="91" y="16" width="9" height="6" rx="1" fill="rgba(245,160,0,0.1)" stroke="rgba(245,160,0,0.2)" stroke-width=".5"/>
+        <!-- Carriage 4 -->
+        <rect x="118" y="11" width="56" height="17" rx="1" fill="#261C10" stroke="rgba(245,160,0,0.28)" stroke-width=".8"/>
+        <rect x="123" y="15" width="9" height="7" rx="1" fill="rgba(245,160,0,0.12)" stroke="rgba(245,160,0,0.25)" stroke-width=".5"/>
+        <rect x="136" y="15" width="9" height="7" rx="1" fill="rgba(245,160,0,0.12)" stroke="rgba(245,160,0,0.25)" stroke-width=".5"/>
+        <rect x="149" y="15" width="9" height="7" rx="1" fill="rgba(245,160,0,0.12)" stroke="rgba(245,160,0,0.25)" stroke-width=".5"/>
+        <!-- Carriage 3 -->
+        <rect x="176" y="10" width="56" height="18" rx="1" fill="#261C10" stroke="rgba(245,160,0,0.32)" stroke-width=".9"/>
+        <rect x="181" y="14" width="9" height="7" rx="1" fill="rgba(245,160,0,0.15)" stroke="rgba(245,160,0,0.3)" stroke-width=".5"/>
+        <rect x="194" y="14" width="9" height="7" rx="1" fill="rgba(245,160,0,0.15)" stroke="rgba(245,160,0,0.3)" stroke-width=".5"/>
+        <rect x="207" y="14" width="9" height="7" rx="1" fill="rgba(245,160,0,0.15)" stroke="rgba(245,160,0,0.3)" stroke-width=".5"/>
+        <!-- Carriage 2 -->
+        <rect x="234" y="9" width="56" height="19" rx="1" fill="#221A10" stroke="rgba(245,160,0,0.38)" stroke-width="1"/>
+        <rect x="239" y="13" width="10" height="8" rx="1" fill="rgba(245,160,0,0.18)" stroke="rgba(245,160,0,0.35)" stroke-width=".5"/>
+        <rect x="253" y="13" width="10" height="8" rx="1" fill="rgba(245,160,0,0.18)" stroke="rgba(245,160,0,0.35)" stroke-width=".5"/>
+        <rect x="267" y="13" width="10" height="8" rx="1" fill="rgba(245,160,0,0.18)" stroke="rgba(245,160,0,0.35)" stroke-width=".5"/>
+        <!-- Power car / nose carriage -->
+        <rect x="292" y="7" width="60" height="22" rx="2" fill="#1E1510" stroke="rgba(245,160,0,0.5)" stroke-width="1.1"/>
+        <rect x="297" y="11" width="10" height="8" rx="1" fill="rgba(245,160,0,0.22)" stroke="rgba(245,160,0,0.45)" stroke-width=".5"/>
+        <rect x="311" y="11" width="10" height="8" rx="1" fill="rgba(245,160,0,0.22)" stroke="rgba(245,160,0,0.45)" stroke-width=".5"/>
+        <!-- Aerodynamic nose -->
+        <path d="M352 7 Q380 10 398 18 Q380 26 352 29 Z" fill="#1A1008" stroke="rgba(245,160,0,0.55)" stroke-width="1.1"/>
+        <!-- Headlight -->
+        <ellipse cx="393" cy="18" rx="3" ry="2.5" fill="rgba(245,220,120,0.85)" stroke="rgba(255,240,180,0.6)" stroke-width=".8"/>
+        <!-- Roof stripe -->
+        <line x1="62" y1="12" x2="352" y2="7" stroke="rgba(245,160,0,0.15)" stroke-width=".8"/>
+        <!-- Wheels -->
+        <circle cx="76" cy="30" r="4" fill="#160F08" stroke="rgba(245,160,0,0.25)" stroke-width=".8"/>
+        <circle cx="106" cy="30" r="4" fill="#160F08" stroke="rgba(245,160,0,0.25)" stroke-width=".8"/>
+        <circle cx="134" cy="30" r="4" fill="#160F08" stroke="rgba(245,160,0,0.28)" stroke-width=".8"/>
+        <circle cx="164" cy="30" r="4" fill="#160F08" stroke="rgba(245,160,0,0.28)" stroke-width=".8"/>
+        <circle cx="192" cy="30" r="4" fill="#160F08" stroke="rgba(245,160,0,0.3)" stroke-width=".8"/>
+        <circle cx="222" cy="30" r="4" fill="#160F08" stroke="rgba(245,160,0,0.3)" stroke-width=".8"/>
+        <circle cx="250" cy="30" r="4" fill="#160F08" stroke="rgba(245,160,0,0.35)" stroke-width=".8"/>
+        <circle cx="280" cy="30" r="4" fill="#160F08" stroke="rgba(245,160,0,0.35)" stroke-width=".8"/>
+        <circle cx="308" cy="30" r="4.5" fill="#160F08" stroke="rgba(245,160,0,0.4)" stroke-width=".9"/>
+        <circle cx="342" cy="30" r="4.5" fill="#160F08" stroke="rgba(245,160,0,0.4)" stroke-width=".9"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <span>The Platform &middot; Product Overview &middot; Confidential</span>
+  <span>The Journey &middot; The Network &middot; The Station</span>
+</footer>
+
+<script>
+var sl=document.getElementById('sleepers');
+if(sl){for(var i=0;i<50;i++){var d=document.createElement('div');d.className='track-sleeper';sl.appendChild(d);}}
+</script>
+</body>
+</html>

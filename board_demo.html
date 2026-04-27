@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The Platform &mdash; The Station</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1E1510;--bg2:#160F08;--surface:#221A10;--surface2:#2A2018;
+  --border:#2A2418;--border2:#3A3020;
+  --text:#EFE8DB;--text2:#8B8070;--text3:#4A4438;
+  --gold:#F5A000;--green:#2E6F4C;--greenlt:#4DFF9A;
+  --red:#B33931;--redlt:#FF6B6B;--blue:#3A6B8A;
+  --mono:"DM Mono",ui-monospace,monospace;
+  --display:"DM Serif Display",Georgia,serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg2);color:var(--text);font-family:var(--mono);font-size:14px;min-height:100vh;-webkit-font-smoothing:antialiased}
+.hdr{background:var(--bg2);border-bottom:2px solid var(--gold);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.5)}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.hdr-back{background:none;border:none;font-family:var(--mono);font-size:10px;font-weight:600;color:rgba(239,232,219,.4);letter-spacing:.08em;cursor:pointer;padding:4px 10px 4px 0;border-right:1px solid var(--border2);margin-right:4px;text-decoration:none;transition:color .15s}
+.hdr-back:hover{color:var(--text)}
+.hdr-brand{font-family:var(--display);font-size:1.15rem;color:var(--text)}
+.hdr-brand em{font-style:italic;color:#C44055}
+.hdr-mode{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--bg2);background:var(--gold);padding:3px 8px}
+.hdr-demo{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);padding:2px 8px;opacity:.7}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.hdr-bal{font-size:11px;color:var(--text2)}
+.hdr-bal strong{color:var(--gold);font-size:1rem;font-weight:600}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:ldP 2s ease-in-out infinite}
+@keyframes ldP{0%,100%{opacity:1}50%{opacity:.3}}
+.app{max-width:1100px;margin:0 auto;padding:16px 20px 40px}
+.round-strip{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--gold);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.rs-left{display:flex;flex-direction:column;gap:2px}
+.rs-round{font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text2)}
+.rs-phase{font-family:var(--display);font-size:1.5rem}
+.rs-phase.ph-betting{color:var(--gold)}.rs-phase.ph-settling{color:var(--greenlt)}
+.rs-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.rs-timer-lbl{font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
+.rs-timer{font-family:var(--display);font-size:2.8rem;color:var(--gold);line-height:1}
+.rs-timer.t-urgent{color:var(--red);animation:urgP 1s ease-in-out infinite}
+@keyframes urgP{0%,100%{opacity:1}50%{opacity:.5}}
+.stat-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:12px}
+.ss-cell{background:var(--surface);padding:10px 8px;text-align:center}
+.ss-lbl{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);margin-bottom:4px}
+.ss-val{font-size:1.3rem;font-weight:600;color:var(--text)}
+.ss-val.sv-gold{color:var(--gold)}.ss-val.sv-green{color:var(--green)}.ss-val.sv-blue{color:var(--blue)}
+.cabinet{border:2px solid var(--border);border-radius:3px;overflow:hidden;margin-bottom:12px;box-shadow:0 0 0 1px var(--border2),0 8px 32px rgba(0,0,0,.6)}
+.cab-hdr{background:#0E0C08;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.cab-title{display:flex;align-items:center;gap:10px}
+.cab-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px rgba(245,160,0,.4)}
+.cab-lbl{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.cab-sub{font-size:9px;color:var(--text2);letter-spacing:.1em}
+.cab-demo-badge{font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(245,160,0,.3);padding:2px 7px}
+.cab-col-hds{display:grid;grid-template-columns:100px 1fr 60px 90px;padding:8px 16px 5px;background:#0A0806;border-bottom:1px solid var(--border)}
+.cab-col-hd{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--text2)}
+.cab-body{background:#1A1208;min-height:80px}
+.cab-betting-placeholder{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:36px 20px;text-align:center;background:#1A1208;
+  border-bottom:1px solid var(--border);gap:10px;
+}
+.cbp-icon{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:ldP 2s ease-in-out infinite;margin-bottom:4px}
+.cbp-title{font-family:var(--display);font-size:clamp(0.9rem,3.5vw,1.4rem);color:var(--text);line-height:1.2;white-space:nowrap}
+.cbp-sub{font-size:10px;color:var(--text2);letter-spacing:.08em;text-transform:uppercase}
+.cab-row{display:grid;grid-template-columns:100px 1fr 60px 90px;padding:11px 16px;border-bottom:1px solid var(--border);align-items:center}
+.cab-row.cr-feat{background:#1E1510;border-left:2px solid var(--gold)}
+.cab-row.cr-due{background:rgba(245,160,0,.06);border-left:2px solid var(--gold);animation:rowIn .4s ease-out}
+.cab-row.cr-passed{opacity:.45;border-left:2px solid var(--blue)}
+.cab-row.cr-freight{opacity:.5}
+@keyframes rowIn{from{background:rgba(245,160,0,.15)}to{background:rgba(245,160,0,.06)}}
+.cab-empty{padding:24px;text-align:center;font-size:11px;color:var(--text2);letter-spacing:.1em;text-transform:uppercase}
+.flap-t{display:flex;gap:2px;align-items:center}
+.flap-c{width:18px;height:28px;background:#221A0E;border-radius:1px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--gold);border-bottom:1px solid #160F08}
+.flap-c.fc-col{background:transparent;width:7px;font-size:11px}
+.dest-c{display:flex;flex-direction:column;gap:3px;padding-left:6px}
+.dest-main{font-size:13px;font-weight:600;color:var(--text);letter-spacing:.04em}
+.dest-main.dm-dim{color:var(--text2)}
+.dest-sub{font-size:10px;color:var(--text2)}
+.plat-c{display:flex;gap:2px;justify-content:center}
+.plat-ch{width:20px;height:28px;background:#221A0E;border-radius:1px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text);border-bottom:1px solid #160F08}
+.st-c{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-align:right}
+.sc-due{color:var(--gold)}.sc-soon{color:var(--text2)}.sc-imm{color:rgba(245,160,0,.6)}.sc-passed{color:var(--blue)}.sc-freight{color:var(--text3)}
+.cab-foot{background:#0E0C08;border-top:1px solid var(--border);padding:7px 16px;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);text-align:center}
+.live-counter{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:12px}
+.lc-cell{background:var(--surface);padding:12px 8px;text-align:center;transition:background .3s}
+.lc-cell.lc-flash{background:rgba(46,111,76,.25)}
+.lc-lbl{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:4px}
+.lc-val{font-size:1.6rem;font-weight:600;color:var(--text)}
+.lc-val.lcv-total{color:var(--gold);font-size:2rem}
+.lc-val.lcv-stop{color:var(--green)}.lc-val.lcv-pass{color:var(--blue)}
+.events-feed{border:1px solid var(--border);margin-bottom:12px;max-height:130px;overflow-y:auto;scrollbar-width:none}
+.events-feed::-webkit-scrollbar{display:none}
+.ev-hdr{padding:6px 12px;background:#0E0C08;border-bottom:1px solid var(--border);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--text2)}
+.ev-row{padding:7px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;animation:evS .3s ease-out}
+@keyframes evS{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.ev-time{font-size:10px;color:var(--text2);flex-shrink:0;width:50px}
+.ev-badge{font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;flex-shrink:0}
+.ev-stop{background:rgba(46,111,76,.15);color:var(--green);border:1px solid rgba(46,111,76,.3)}
+.ev-pass{background:rgba(58,107,138,.15);color:var(--blue);border:1px solid rgba(58,107,138,.3)}
+.ev-freight{background:rgba(74,68,56,.2);color:var(--text2);border:1px solid var(--border)}
+.ev-desc{font-size:10px;color:var(--text)}
+.mkt-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mh-title{font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text)}
+.mh-status{font-size:9px;color:var(--text2)}
+.mkt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+@media(max-width:600px){.mkt-grid{grid-template-columns:1fr}.stat-strip,.live-counter{grid-template-columns:repeat(3,1fr)}.cab-col-hds,.cab-row{grid-template-columns:80px 1fr 45px 60px}}
+.mkt-card{border:1px solid var(--border);background:var(--surface);overflow:hidden}
+.mkt-card.mc-win{border-color:rgba(46,111,76,.5);background:rgba(46,111,76,.08)}
+.mkt-card.mc-lose{border-color:rgba(179,57,49,.4);background:rgba(179,57,49,.06)}
+.mc-head{padding:10px 14px 5px;display:flex;align-items:center;justify-content:space-between}
+.mc-name{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text2)}
+.mc-badge{font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px}
+.mcb-open{background:rgba(46,111,76,.12);color:var(--green);border:1px solid rgba(46,111,76,.25)}
+.mcb-closed{background:rgba(74,68,56,.2);color:var(--text2);border:1px solid var(--border)}
+.mcb-won{background:var(--green);color:#fff}.mcb-lost{background:var(--red);color:#fff}
+.mc-q{font-family:var(--display);font-size:1.05rem;color:var(--text);padding:0 14px 7px;line-height:1.3}
+.mc-ref{font-size:9px;color:var(--text2);padding:0 14px 10px;font-style:italic}
+.mc-opts{display:flex;flex-direction:column;gap:1px;background:var(--border);border-top:1px solid var(--border)}
+.mc-opt{background:var(--surface2);border:none;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .1s;width:100%;text-align:left}
+.mc-opt:hover:not(.sel):not(.dis){background:#2E2820}
+.mc-opt.sel{background:#0D3020;border-left:3px solid var(--green)}
+.mc-opt.dis{opacity:.4;cursor:not-allowed}
+.opt-lbl{font-size:12px;font-weight:600;color:var(--text)}
+.mc-opt.sel .opt-lbl{color:var(--greenlt)}
+.opt-odds{font-family:var(--display);font-size:1.2rem;color:var(--gold);margin-left:10px;flex-shrink:0}
+.mc-opt.sel .opt-odds{color:var(--greenlt)}
+.mc-res{padding:8px 14px;background:#0D0A06;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:10px;gap:4px;flex-wrap:wrap}
+.mrr-lbl{color:var(--text2)}.mrr-win{color:var(--green);font-weight:600}.mrr-lose{color:var(--redlt);font-weight:600}
+.slip{border:1px solid var(--border);border-left:3px solid var(--gold);background:var(--surface);padding:14px 16px;margin-bottom:12px}
+.slip-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+.slip-title{font-size:9px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text2)}
+.slip-summary{font-size:11px;color:var(--text2)}
+.slip-summary strong{color:var(--gold)}
+.slip-row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);align-items:baseline}
+.slip-row:last-child{border-bottom:none}
+.slip-row-lbl{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.slip-row-lbl.won{color:var(--greenlt)}.slip-row-lbl.lost{color:var(--redlt)}
+.slip-row-val{font-size:11px;color:var(--text2);white-space:nowrap;text-align:right;flex-shrink:0}
+.slip-row-val.won{color:var(--greenlt);font-weight:600}.slip-row-val.lost{color:var(--redlt)}
+/* sticky mobile bar */
+.sticky-bar{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:#1A1208;border-top:2px solid var(--gold);
+  padding:10px 16px;
+  align-items:center;justify-content:space-between;gap:12px;
+  box-shadow:0 -4px 20px rgba(0,0,0,.6);
+}
+.sb-left{display:flex;flex-direction:column;gap:2px}
+.sb-bets{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text2)}
+.sb-staked{font-size:11px;color:var(--text);font-weight:600}
+.sb-right{text-align:right}
+.sb-pot-lbl{font-size:9px;color:var(--text2);letter-spacing:.08em;text-transform:uppercase}
+.sb-pot-val{font-family:var(--display);font-size:1.4rem;color:var(--gold);line-height:1}
+@media(max-width:720px){
+  .sticky-bar{display:flex}
+  .app{padding-bottom:80px}
+}
+/* per-market bet input */
+.mc-bet{border-top:1px solid var(--border);background:#0D0A06;padding:10px 14px}
+.mc-bet-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.mc-bet-lbl{font-size:9px;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;flex-shrink:0}
+.mc-bet-input{flex:1;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:0.9rem;font-weight:600;padding:7px 10px;outline:none;transition:border-color .15s;min-width:0}
+.mc-bet-input:focus{border-color:var(--gold)}
+.mc-bet-input::placeholder{color:var(--text3);font-weight:400;font-size:.78rem}
+.mc-bet-qs{display:flex;gap:3px;flex-shrink:0}
+.mc-bet-q{background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:10px;font-weight:600;padding:5px 8px;cursor:pointer;transition:all .1s}
+.mc-bet-q:hover{background:#2E2820;color:var(--text)}
+.mc-bet-ret{display:flex;justify-content:space-between;margin-bottom:8px;font-size:10px}
+.mc-bet-ret-lbl{color:var(--text2)}
+.mc-bet-ret-val{color:var(--text);font-weight:600}
+.mc-place-btn{width:100%;padding:9px;background:var(--gold);border:none;color:#000;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.mc-place-btn:hover:not(:disabled){background:#D4A240}
+.mc-place-btn:disabled{background:var(--surface2);color:var(--text3);cursor:not-allowed}
+.mc-placed-row{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:rgba(46,111,76,.08);border-top:1px solid rgba(46,111,76,.2);font-size:10px}
+.mc-placed-lbl{color:var(--green);font-weight:600}
+.mc-placed-ret{color:var(--text2)}
+.result-banner{border:2px solid var(--border);padding:28px 20px;text-align:center;margin-bottom:12px;display:none}
+.result-banner.show{display:block;animation:rbIn .4s ease-out}
+@keyframes rbIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.rb-win{background:rgba(46,111,76,.12);border-color:rgba(46,111,76,.4)}
+.rb-lose{background:rgba(179,57,49,.1);border-color:rgba(179,57,49,.3)}
+.rb-partial{background:rgba(196,146,42,.08);border-color:rgba(196,146,42,.3)}
+.rb-icon{font-size:2.4rem;margin-bottom:8px}
+.rb-lbl{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text2);margin-bottom:6px}
+.rb-val{font-family:var(--display);font-size:3rem;line-height:1;margin-bottom:6px}
+.rb-win .rb-val{color:var(--greenlt)}.rb-lose .rb-val{color:var(--redlt)}.rb-partial .rb-val{color:var(--gold)}
+.rb-det{font-size:11px;color:var(--text2);margin-bottom:16px}
+.next-btn{padding:10px 28px;background:transparent;border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.next-btn:hover{background:var(--surface2)}
+.hist{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;align-items:center}
+.hist::-webkit-scrollbar{display:none}
+.hist-lbl{font-size:9px;color:var(--text2);align-self:center;flex-shrink:0;text-transform:uppercase;letter-spacing:.06em;margin-right:2px}
+.hi-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.hi-dot.hi-w{background:var(--green);box-shadow:0 0 5px rgba(46,111,76,.5)}
+.hi-dot.hi-l{background:var(--red);box-shadow:0 0 5px rgba(179,57,49,.4)}
+.hi-dot.hi-push{background:var(--text3)}
+.mc-tracking{padding:7px 14px;border-top:1px solid var(--border);background:#0A0806;font-size:10px;display:flex;justify-content:space-between;align-items:center}
+.mct-lbl{color:var(--text2)}
+.mct-winning{color:var(--greenlt);font-weight:600}
+.mct-losing{color:var(--redlt);font-weight:600}
+.mct-close{color:var(--gold);font-weight:600}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-left">
+    <a class="hdr-back" href="platform_v1.html#lobby">&larr; Lobby</a>
+    <span class="hdr-brand">The <em>Platform</em></span>
+    <span class="hdr-mode">The Station</span>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-demo"><div class="live-dot" style="display:inline-block;vertical-align:middle;margin-right:4px;background:var(--gold)"></div>Demo Mode</span>
+    <div class="hdr-bal">BAL <strong id="balD">&pound;100.00</strong><span id="pnlInd" style="font-family:var(--mono);font-size:9px;margin-left:6px;display:none"></span></div>
+  </div>
+</div>
+<div class="app">
+  <div class="round-strip">
+    <div class="rs-left">
+      <div class="rs-round">Round <span id="rNum">1</span></div>
+      <div class="rs-phase ph-betting" id="phLbl">Betting Open</div>
+    </div>
+    <div class="rs-right">
+      <div class="rs-timer-lbl" id="tLbl">Betting closes in</div>
+      <div class="rs-timer" id="tDisp">60</div>
+    </div>
+  </div>
+  <div class="stat-strip">
+    <div class="ss-cell"><div class="ss-lbl">Last round</div><div class="ss-val sv-gold" id="lrT">--</div></div>
+    <div class="ss-cell"><div class="ss-lbl">Stopping</div><div class="ss-val sv-green" id="lrS">--</div></div>
+    <div class="ss-cell"><div class="ss-lbl">Passing</div><div class="ss-val" id="lrP">--</div></div>
+    <div class="ss-cell"><div class="ss-lbl">&rarr; London</div><div class="ss-val" id="lrTw">--</div></div>
+    <div class="ss-cell"><div class="ss-lbl">&larr; Away</div><div class="ss-val" id="lrA">--</div></div>
+    <div class="ss-cell"><div class="ss-lbl">Freight</div><div class="ss-val" id="lrF">--</div></div>
+  </div>
+  <div class="cabinet">
+    <div class="cab-hdr">
+      <div class="cab-title">
+        <div class="cab-dot"></div>
+        <span class="cab-lbl">Live Movements</span>
+        <span class="cab-sub" id="cabSub"></span>
+      </div>
+      <span id="cabWindowInd" style="font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:.06em;text-transform:uppercase;text-align:right;line-height:1.6;flex-shrink:0"></span>
+    </div>
+    <div class="cab-col-hds" id="cabColHds">
+      <div class="cab-col-hd">ETA</div>
+      <div class="cab-col-hd">Movement</div>
+      <div class="cab-col-hd">Plat</div>
+      <div class="cab-col-hd" style="text-align:right">Status</div>
+    </div>
+    <div class="cab-body" id="boardRows"><div class="cab-empty">Loading&hellip;</div></div>
+    <div class="cab-betting-placeholder" id="cabPlaceholder">
+      <div class="cbp-icon">&#9679;</div>
+      <div class="cbp-title">Live departures shown once round opens</div>
+      <div class="cbp-sub">Place your bets using last round data above</div>
+    </div>
+    <div class="cab-foot">Live system &mdash; Rail Track Darwin Feed</div>
+  </div>
+  <div class="live-counter" id="liveCounter" style="display:none">
+    <div class="lc-cell"><div class="lc-lbl">Total</div><div class="lc-val lcv-total" id="lcT">0</div></div>
+    <div class="lc-cell"><div class="lc-lbl">Stopping</div><div class="lc-val lcv-stop" id="lcS">0</div></div>
+    <div class="lc-cell"><div class="lc-lbl">Passing</div><div class="lc-val lcv-pass" id="lcP">0</div></div>
+    <div class="lc-cell"><div class="lc-lbl">&rarr; London</div><div class="lc-val" id="lcTw">0</div></div>
+    <div class="lc-cell"><div class="lc-lbl">&larr; Away</div><div class="lc-val" id="lcAw">0</div></div>
+    <div class="lc-cell"><div class="lc-lbl">Freight</div><div class="lc-val" id="lcFr">0</div></div>
+  </div>
+  <div class="events-feed" id="evFeed" style="display:none">
+    <div class="ev-hdr">Live events this round</div>
+    <div id="evBody"></div>
+  </div>
+  <div class="result-banner" id="resBanner">
+    <div class="rb-icon" id="rbIcon"></div>
+    <div class="rb-lbl" id="rbLbl"></div>
+    <div class="rb-val" id="rbVal"></div>
+    <div class="rb-det" id="rbDet"></div>
+    <button class="next-btn" onclick="startNewRound()">Next Round &rarr;</button>
+  </div>
+  <div class="mkt-hdr">
+    <span class="mh-title">Markets &mdash; Round <span id="mktR">1</span></span>
+    <span class="mh-status" id="mktSt">Place your bets</span>
+  </div>
+  <div class="mkt-grid" id="mktGrid"></div>
+  <div class="slip" id="slipDiv">
+    <div class="slip-top">
+      <span class="slip-title">Active Bets</span>
+      <span class="slip-summary" id="slipSummary">No bets placed</span>
+    </div>
+    <div id="slipBetsList" style="font-family:var(--mono);font-size:11px;color:var(--text2)"></div>
+  </div>
+  <div class="hist" id="histBar">
+    <span class="hist-lbl">History:</span>
+  </div>
+</div>
+<!-- sticky mobile bar -->
+<div class="sticky-bar" id="stickyBar" style="display:none">
+  <div class="sb-left">
+    <span class="sb-bets" id="sbBets">0 bets</span>
+    <span class="sb-staked" id="sbStaked">&pound;0.00 staked</span>
+  </div>
+  <div class="sb-right">
+    <div class="sb-pot-lbl">Potential</div>
+    <div class="sb-pot-val" id="sbPot">&pound;--</div>
+  </div>
+</div>
+<script>
+var WINDOWS=[{"label": "Peak WCML", "trains": [{"hc": "1A20", "dir": "T", "mv": "S", "plat": "4", "t": 8, "pass": true}, {"hc": "1Y32", "dir": "A", "mv": "S", "plat": "5", "t": 22, "pass": true}, {"hc": "1M14", "dir": "T", "mv": "P", "plat": null, "t": 35, "pass": true}, {"hc": "4O55", "dir": "A", "mv": "F", "plat": "3", "t": 48, "pass": false}, {"hc": "1B24", "dir": "T", "mv": "S", "plat": "2", "t": 61, "pass": true}, {"hc": "1N06", "dir": "A", "mv": "P", "plat": null, "t": 74, "pass": true}, {"hc": "1A21", "dir": "T", "mv": "P", "plat": null, "t": 89, "pass": true}, {"hc": "5Z70", "dir": "T", "mv": "S", "plat": "1", "t": 105, "pass": false}]}, {"label": "Quiet", "trains": [{"hc": "1Y44", "dir": "A", "mv": "S", "plat": "6", "t": 18, "pass": true}, {"hc": "1M22", "dir": "T", "mv": "P", "plat": null, "t": 55, "pass": true}, {"hc": "2P90", "dir": "A", "mv": "S", "plat": "5", "t": 95, "pass": true}]}, {"label": "Freight", "trains": [{"hc": "6M22", "dir": "T", "mv": "F", "plat": "3", "t": 12, "pass": false}, {"hc": "1A30", "dir": "T", "mv": "S", "plat": "4", "t": 31, "pass": true}, {"hc": "4O61", "dir": "A", "mv": "F", "plat": null, "t": 45, "pass": false}, {"hc": "1N12", "dir": "A", "mv": "P", "plat": null, "t": 67, "pass": true}, {"hc": "7G22", "dir": "A", "mv": "F", "plat": "3", "t": 88, "pass": false}, {"hc": "1B36", "dir": "T", "mv": "S", "plat": "2", "t": 108, "pass": true}]}, {"label": "London-bound", "trains": [{"hc": "1A42", "dir": "T", "mv": "S", "plat": "4", "t": 9, "pass": true}, {"hc": "1M30", "dir": "T", "mv": "P", "plat": null, "t": 24, "pass": true}, {"hc": "1B48", "dir": "T", "mv": "S", "plat": "2", "t": 41, "pass": true}, {"hc": "1Y56", "dir": "A", "mv": "S", "plat": "5", "t": 58, "pass": true}, {"hc": "1A43", "dir": "T", "mv": "P", "plat": null, "t": 75, "pass": true}, {"hc": "1M31", "dir": "T", "mv": "S", "plat": "4", "t": 92, "pass": true}, {"hc": "1N20", "dir": "A", "mv": "P", "plat": null, "t": 110, "pass": true}]}, {"label": "Plat 2 Busy", "trains": [{"hc": "1A50", "dir": "T", "mv": "S", "plat": "2A", "t": 14, "pass": true}, {"hc": "1Y60", "dir": "A", "mv": "S", "plat": "5", "t": 33, "pass": true}, {"hc": "1M40", "dir": "T", "mv": "S", "plat": "2", "t": 52, "pass": true}, {"hc": "1B54", "dir": "A", "mv": "P", "plat": null, "t": 71, "pass": true}, {"hc": "1A51", "dir": "T", "mv": "S", "plat": "2", "t": 96, "pass": true}]}, {"label": "High Volume", "trains": [{"hc": "1A60", "dir": "T", "mv": "S", "plat": "4", "t": 5, "pass": true}, {"hc": "1Y70", "dir": "A", "mv": "S", "plat": "6", "t": 14, "pass": true}, {"hc": "1M50", "dir": "T", "mv": "P", "plat": null, "t": 23, "pass": true}, {"hc": "4M22", "dir": "T", "mv": "F", "plat": "1", "t": 32, "pass": false}, {"hc": "1B60", "dir": "T", "mv": "S", "plat": "2", "t": 42, "pass": true}, {"hc": "1N30", "dir": "A", "mv": "P", "plat": null, "t": 53, "pass": true}, {"hc": "1A61", "dir": "T", "mv": "S", "plat": "4", "t": 64, "pass": true}, {"hc": "1Y71", "dir": "A", "mv": "S", "plat": "5", "t": 76, "pass": true}, {"hc": "1M51", "dir": "T", "mv": "P", "plat": null, "t": 88, "pass": true}, {"hc": "5Z80", "dir": "A", "mv": "F", "plat": "3", "t": 99, "pass": false}, {"hc": "1B61", "dir": "A", "mv": "S", "plat": "6", "t": 112, "pass": true}]}, {"label": "Northbound", "trains": [{"hc": "1Y80", "dir": "A", "mv": "S", "plat": "5", "t": 11, "pass": true}, {"hc": "1N40", "dir": "A", "mv": "P", "plat": null, "t": 28, "pass": true}, {"hc": "1A70", "dir": "T", "mv": "S", "plat": "4", "t": 44, "pass": true}, {"hc": "1Y81", "dir": "A", "mv": "S", "plat": "6", "t": 59, "pass": true}, {"hc": "2P60", "dir": "A", "mv": "P", "plat": null, "t": 77, "pass": true}, {"hc": "1Y82", "dir": "A", "mv": "S", "plat": "5", "t": 101, "pass": true}]}, {"label": "Mixed", "trains": [{"hc": "1A80", "dir": "T", "mv": "S", "plat": "4", "t": 16, "pass": true}, {"hc": "1M60", "dir": "T", "mv": "P", "plat": null, "t": 37, "pass": true}, {"hc": "1Y90", "dir": "A", "mv": "S", "plat": "5", "t": 58, "pass": true}, {"hc": "1B70", "dir": "T", "mv": "S", "plat": "2", "t": 81, "pass": true}, {"hc": "1N50", "dir": "A", "mv": "P", "plat": null, "t": 103, "pass": true}]}, {"label": "Freight Mix", "trains": [{"hc": "1A90", "dir": "T", "mv": "S", "plat": "4", "t": 19, "pass": true}, {"hc": "6E22", "dir": "A", "mv": "F", "plat": null, "t": 38, "pass": false}, {"hc": "1Y00", "dir": "A", "mv": "S", "plat": "6", "t": 55, "pass": true}, {"hc": "1M70", "dir": "T", "mv": "P", "plat": null, "t": 76, "pass": true}, {"hc": "1B80", "dir": "T", "mv": "S", "plat": "2", "t": 97, "pass": true}]}, {"label": "Equal Split", "trains": [{"hc": "1A02", "dir": "T", "mv": "S", "plat": "4", "t": 13, "pass": true}, {"hc": "1Y10", "dir": "A", "mv": "S", "plat": "5", "t": 29, "pass": true}, {"hc": "1M80", "dir": "T", "mv": "P", "plat": null, "t": 47, "pass": true}, {"hc": "1N60", "dir": "A", "mv": "P", "plat": null, "t": 63, "pass": true}, {"hc": "1B90", "dir": "T", "mv": "S", "plat": "2", "t": 82, "pass": true}, {"hc": "1Y11", "dir": "A", "mv": "S", "plat": "6", "t": 99, "pass": true}]}, {"label": "All Stopping", "trains": [{"hc": "1A10", "dir": "T", "mv": "S", "plat": "4", "t": 17, "pass": true}, {"hc": "1Y20", "dir": "A", "mv": "S", "plat": "5", "t": 34, "pass": true}, {"hc": "1B00", "dir": "T", "mv": "S", "plat": "2", "t": 54, "pass": true}, {"hc": "1N70", "dir": "A", "mv": "S", "plat": "6", "t": 74, "pass": true}, {"hc": "1A11", "dir": "T", "mv": "S", "plat": "4", "t": 96, "pass": true}]}, {"label": "Expresses", "trains": [{"hc": "1M90", "dir": "T", "mv": "P", "plat": null, "t": 11, "pass": true}, {"hc": "1N80", "dir": "A", "mv": "P", "plat": null, "t": 29, "pass": true}, {"hc": "1M91", "dir": "T", "mv": "P", "plat": null, "t": 51, "pass": true}, {"hc": "1N81", "dir": "A", "mv": "P", "plat": null, "t": 73, "pass": true}, {"hc": "1M92", "dir": "T", "mv": "P", "plat": null, "t": 101, "pass": true}]}, {"label": "Night Feel", "trains": [{"hc": "7M22", "dir": "T", "mv": "F", "plat": "1", "t": 28, "pass": false}, {"hc": "1A20", "dir": "T", "mv": "S", "plat": "4", "t": 71, "pass": true}, {"hc": "4E44", "dir": "A", "mv": "F", "plat": null, "t": 105, "pass": false}]}, {"label": "Peak Variant", "trains": [{"hc": "1B10", "dir": "T", "mv": "S", "plat": "2", "t": 7, "pass": true}, {"hc": "1Y30", "dir": "A", "mv": "S", "plat": "5", "t": 19, "pass": true}, {"hc": "1M02", "dir": "T", "mv": "P", "plat": null, "t": 33, "pass": true}, {"hc": "1A30", "dir": "T", "mv": "S", "plat": "4", "t": 46, "pass": true}, {"hc": "4M55", "dir": "A", "mv": "F", "plat": "3", "t": 59, "pass": false}, {"hc": "1N02", "dir": "A", "mv": "P", "plat": null, "t": 72, "pass": true}, {"hc": "1B11", "dir": "T", "mv": "S", "plat": "2", "t": 87, "pass": true}, {"hc": "1Y31", "dir": "A", "mv": "S", "plat": "6", "t": 103, "pass": true}]}, {"label": "2A Active", "trains": [{"hc": "1A40", "dir": "T", "mv": "S", "plat": "2A", "t": 22, "pass": true}, {"hc": "1M12", "dir": "T", "mv": "P", "plat": null, "t": 41, "pass": true}, {"hc": "1Y40", "dir": "A", "mv": "S", "plat": "5", "t": 58, "pass": true}, {"hc": "1B20", "dir": "T", "mv": "S", "plat": "2A", "t": 79, "pass": true}, {"hc": "1N10", "dir": "A", "mv": "S", "plat": "6", "t": 108, "pass": true}]}, {"label": "Freight Heavy", "trains": [{"hc": "6M30", "dir": "T", "mv": "F", "plat": null, "t": 9, "pass": false}, {"hc": "1A50", "dir": "T", "mv": "S", "plat": "4", "t": 27, "pass": true}, {"hc": "4O70", "dir": "A", "mv": "F", "plat": "3", "t": 44, "pass": false}, {"hc": "7E30", "dir": "A", "mv": "F", "plat": null, "t": 63, "pass": false}, {"hc": "1Y50", "dir": "A", "mv": "S", "plat": "5", "t": 82, "pass": true}, {"hc": "5A90", "dir": "T", "mv": "F", "plat": "1", "t": 101, "pass": false}]}, {"label": "Midday Mix", "trains": [{"hc": "1A60", "dir": "T", "mv": "S", "plat": "4", "t": 14, "pass": true}, {"hc": "1Y60", "dir": "A", "mv": "P", "plat": null, "t": 33, "pass": true}, {"hc": "1B30", "dir": "T", "mv": "S", "plat": "2", "t": 52, "pass": true}, {"hc": "1M20", "dir": "T", "mv": "P", "plat": null, "t": 71, "pass": true}, {"hc": "1N20", "dir": "A", "mv": "S", "plat": "6", "t": 93, "pass": true}]}, {"label": "South Rush", "trains": [{"hc": "1A70", "dir": "T", "mv": "S", "plat": "4", "t": 8, "pass": true}, {"hc": "1B40", "dir": "T", "mv": "P", "plat": null, "t": 21, "pass": true}, {"hc": "1M30", "dir": "T", "mv": "S", "plat": "2", "t": 36, "pass": true}, {"hc": "1Y70", "dir": "A", "mv": "S", "plat": "5", "t": 51, "pass": true}, {"hc": "1A71", "dir": "T", "mv": "P", "plat": null, "t": 67, "pass": true}, {"hc": "1B41", "dir": "T", "mv": "S", "plat": "4", "t": 84, "pass": true}, {"hc": "1M31", "dir": "T", "mv": "P", "plat": null, "t": 103, "pass": true}]}, {"label": "Sparse", "trains": [{"hc": "1A80", "dir": "T", "mv": "S", "plat": "4", "t": 31, "pass": true}, {"hc": "1N30", "dir": "A", "mv": "P", "plat": null, "t": 79, "pass": true}, {"hc": "1Y80", "dir": "A", "mv": "S", "plat": "5", "t": 112, "pass": true}]}, {"label": "Early Burst", "trains": [{"hc": "1A90", "dir": "T", "mv": "S", "plat": "4", "t": 6, "pass": true}, {"hc": "1M40", "dir": "T", "mv": "P", "plat": null, "t": 13, "pass": true}, {"hc": "1B50", "dir": "T", "mv": "S", "plat": "2", "t": 21, "pass": true}, {"hc": "1Y90", "dir": "A", "mv": "S", "plat": "5", "t": 29, "pass": true}, {"hc": "4O80", "dir": "A", "mv": "F", "plat": "3", "t": 68, "pass": false}]}, {"label": "Late Burst", "trains": [{"hc": "6E50", "dir": "A", "mv": "F", "plat": null, "t": 18, "pass": false}, {"hc": "1A02", "dir": "T", "mv": "S", "plat": "4", "t": 82, "pass": true}, {"hc": "1M50", "dir": "T", "mv": "P", "plat": null, "t": 91, "pass": true}, {"hc": "1B60", "dir": "T", "mv": "S", "plat": "2", "t": 101, "pass": true}, {"hc": "1Y02", "dir": "A", "mv": "S", "plat": "6", "t": 112, "pass": true}]}, {"label": "Balanced Rush", "trains": [{"hc": "1A10", "dir": "T", "mv": "S", "plat": "4", "t": 7, "pass": true}, {"hc": "1Y10", "dir": "A", "mv": "S", "plat": "5", "t": 16, "pass": true}, {"hc": "1M60", "dir": "T", "mv": "P", "plat": null, "t": 27, "pass": true}, {"hc": "1N40", "dir": "A", "mv": "P", "plat": null, "t": 38, "pass": true}, {"hc": "1B70", "dir": "T", "mv": "S", "plat": "2", "t": 51, "pass": true}, {"hc": "1Y11", "dir": "A", "mv": "S", "plat": "6", "t": 64, "pass": true}, {"hc": "4M60", "dir": "T", "mv": "F", "plat": "1", "t": 77, "pass": false}, {"hc": "1A11", "dir": "T", "mv": "P", "plat": null, "t": 91, "pass": true}, {"hc": "1N41", "dir": "A", "mv": "S", "plat": "5", "t": 106, "pass": true}]}, {"label": "North Flow", "trains": [{"hc": "1Y20", "dir": "A", "mv": "S", "plat": "6", "t": 12, "pass": true}, {"hc": "1N50", "dir": "A", "mv": "P", "plat": null, "t": 31, "pass": true}, {"hc": "1A20", "dir": "T", "mv": "S", "plat": "4", "t": 49, "pass": true}, {"hc": "1Y21", "dir": "A", "mv": "S", "plat": "5", "t": 68, "pass": true}, {"hc": "2N90", "dir": "A", "mv": "P", "plat": null, "t": 89, "pass": true}, {"hc": "1Y22", "dir": "A", "mv": "S", "plat": "6", "t": 108, "pass": true}]}, {"label": "Fast & Freight", "trains": [{"hc": "1M70", "dir": "T", "mv": "P", "plat": null, "t": 10, "pass": true}, {"hc": "6M40", "dir": "T", "mv": "F", "plat": "1", "t": 23, "pass": false}, {"hc": "1N60", "dir": "A", "mv": "P", "plat": null, "t": 38, "pass": true}, {"hc": "4E55", "dir": "A", "mv": "F", "plat": "3", "t": 55, "pass": false}, {"hc": "1M71", "dir": "T", "mv": "P", "plat": null, "t": 74, "pass": true}, {"hc": "1N61", "dir": "A", "mv": "P", "plat": null, "t": 97, "pass": true}]}, {"label": "Steady Flow", "trains": [{"hc": "1A30", "dir": "T", "mv": "S", "plat": "4", "t": 18, "pass": true}, {"hc": "1Y30", "dir": "A", "mv": "S", "plat": "5", "t": 39, "pass": true}, {"hc": "1B80", "dir": "T", "mv": "P", "plat": null, "t": 62, "pass": true}, {"hc": "1Y31", "dir": "A", "mv": "P", "plat": null, "t": 84, "pass": true}, {"hc": "1A31", "dir": "T", "mv": "S", "plat": "2", "t": 107, "pass": true}]}, {"label": "Busy + Freight", "trains": [{"hc": "1A40", "dir": "T", "mv": "S", "plat": "4", "t": 8, "pass": true}, {"hc": "7G40", "dir": "A", "mv": "F", "plat": "3", "t": 18, "pass": false}, {"hc": "1Y40", "dir": "A", "mv": "S", "plat": "5", "t": 29, "pass": true}, {"hc": "1M80", "dir": "T", "mv": "P", "plat": null, "t": 42, "pass": true}, {"hc": "1B90", "dir": "T", "mv": "S", "plat": "2", "t": 56, "pass": true}, {"hc": "4O90", "dir": "A", "mv": "F", "plat": null, "t": 70, "pass": false}, {"hc": "1N70", "dir": "A", "mv": "S", "plat": "6", "t": 85, "pass": true}, {"hc": "1A41", "dir": "T", "mv": "P", "plat": null, "t": 101, "pass": true}]}, {"label": "Late Night", "trains": [{"hc": "1A50", "dir": "T", "mv": "S", "plat": "4", "t": 44, "pass": true}, {"hc": "1Y50", "dir": "A", "mv": "S", "plat": "5", "t": 98, "pass": true}]}, {"label": "Eve Peak", "trains": [{"hc": "1A60", "dir": "T", "mv": "S", "plat": "4", "t": 9, "pass": true}, {"hc": "1Y60", "dir": "A", "mv": "S", "plat": "5", "t": 21, "pass": true}, {"hc": "1M90", "dir": "T", "mv": "S", "plat": "2", "t": 34, "pass": true}, {"hc": "1N80", "dir": "A", "mv": "P", "plat": null, "t": 47, "pass": true}, {"hc": "1B02", "dir": "T", "mv": "P", "plat": null, "t": 59, "pass": true}, {"hc": "1Y61", "dir": "A", "mv": "S", "plat": "6", "t": 72, "pass": true}, {"hc": "1A61", "dir": "T", "mv": "S", "plat": "4", "t": 87, "pass": true}, {"hc": "5Z90", "dir": "T", "mv": "F", "plat": "1", "t": 103, "pass": false}]}, {"label": "Express Heavy", "trains": [{"hc": "1M02", "dir": "T", "mv": "P", "plat": null, "t": 11, "pass": true}, {"hc": "1A70", "dir": "T", "mv": "S", "plat": "4", "t": 28, "pass": true}, {"hc": "1N90", "dir": "A", "mv": "P", "plat": null, "t": 43, "pass": true}, {"hc": "1M03", "dir": "T", "mv": "P", "plat": null, "t": 61, "pass": true}, {"hc": "1Y70", "dir": "A", "mv": "S", "plat": "5", "t": 79, "pass": true}, {"hc": "1N91", "dir": "A", "mv": "P", "plat": null, "t": 97, "pass": true}]}, {"label": "Mixed Finale", "trains": [{"hc": "1A80", "dir": "T", "mv": "S", "plat": "4", "t": 14, "pass": true}, {"hc": "6M50", "dir": "T", "mv": "F", "plat": "1", "t": 29, "pass": false}, {"hc": "1Y80", "dir": "A", "mv": "S", "plat": "6", "t": 45, "pass": true}, {"hc": "1M10", "dir": "T", "mv": "P", "plat": null, "t": 63, "pass": true}, {"hc": "1N02", "dir": "A", "mv": "S", "plat": "5", "t": 81, "pass": true}, {"hc": "1B10", "dir": "T", "mv": "S", "plat": "2", "t": 99, "pass": true}]}];
+
+var bal=100,phase="betting",rNum=1,timer=60,lastRnd=null;
+var cur={total:0,stop:0,pass:0,toward:0,away:0,freight:0};
+var baseline={total:0,stop:0,pass:0,toward:0,away:0,freight:0};
+var mBets={},betHist=[],markets=[];
+var firstDir=null,plat2=false;
+var sessionPnL=0; // tracks total P&L this session
+var loggedHc=new Set();
+var windowIdx=0;
+var windowStartTime=0;
+var settleStartTime=0;
+
+// Derive counts from a window definition
+function countsFromWindow(w){
+  var c={total:0,stop:0,pass:0,toward:0,away:0,freight:0};
+  w.trains.forEach(function(t){
+    c.total++;
+    if(!t.pass)c.freight++;
+    else if(t.mv==="S")c.stop++;
+    else c.pass++;
+    if(t.dir==="T")c.toward++;
+    else c.away++;
+  });
+  return c;
+}
+
+// Get seconds elapsed within the current 2-minute round cycle
+// Each round: 60s betting + 60s settling = 120s total
+function getSecondsIntoCycle(){
+  var now=new Date();
+  var secOfHour=now.getMinutes()*60+now.getSeconds();
+  return secOfHour%120; // 0-119
+}
+
+// Get cycle index (which of 20 cycles per hour we're in)
+function getCurrentWindowIdx(){
+  var now=new Date();
+  var secOfHour=now.getMinutes()*60+now.getSeconds();
+  return Math.floor(secOfHour/120)%WINDOWS.length;
+}
+
+// Build visible board rows — rolling window: only show trains within 30s ahead
+// This means trains appear naturally as they approach, not all at once
+function getBoardRows(win,elapsedSec){
+  var rows=[];
+  var LOOK_AHEAD=30; // only show trains arriving within next 30 seconds
+  var LOOK_BEHIND=60; // keep passed trains visible for 60s
+  win.trains.forEach(function(t){
+    var scaledT=Math.round(t.t*0.5);
+    var eta=scaledT-elapsedSec;
+    if(eta<-LOOK_BEHIND)return; // dropped off board
+    if(eta>LOOK_AHEAD)return;   // not in window yet
+    var isPassed=eta<0;
+    var isDue=!isPassed&&eta<=15;
+    var isSoon=!isPassed&&!isDue&&eta<=30;
+    var isFr=!t.pass;
+    var dirShort=t.dir==="T"?"-> LDN":"<- AWY";
+    var mvLabel=isFr?"FREIGHT":t.mv==="P"?"PASSING THROUGH":"STOPPING";
+    var etaLabel=isPassed?"PASSED":eta<=0?"DUE NOW":Math.floor(eta/60).toString().padStart(2,"0")+":"+Math.floor(eta%60).toString().padStart(2,"0");
+    var scls,stxt;
+    if(isPassed){scls="st-c sc-passed";stxt="PASSED";}
+    else if(isDue){scls="st-c sc-due";stxt="DUE NOW";}
+    else if(isSoon){scls="st-c sc-soon";stxt="SOON";}
+    else{scls="st-c sc-soon";stxt="UPCOMING";}
+    if(isFr)scls="st-c sc-freight";
+    rows.push({t:t,eta:eta,etaLabel:etaLabel,isPassed:isPassed,isDue:isDue,isFr:isFr,mvLabel:mvLabel,dirShort:dirShort,scls:scls,stxt:stxt});
+  });
+  rows.sort(function(a,b){return a.eta-b.eta;});
+  // Update window indicator
+  var ind=document.getElementById("cabWindowInd");
+  if(ind){
+    if(phase==="settling"){
+      var remaining=Math.max(0,60-elapsedSec);
+      ind.innerHTML="Shows next 30s<br>"+Math.ceil(remaining)+"s remaining";
+    }else{
+      ind.innerHTML="";
+    }
+  }
+  return rows.slice(0,8);
+}
+
+function renderBoardRows(rows){
+  var body=document.getElementById("boardRows");
+  if(!rows.length){body.innerHTML="<div class='cab-empty'>No movements in window</div>";return;}
+  body.innerHTML="";
+  rows.forEach(function(r,i){
+    var row=document.createElement("div");
+    var cls="cab-row"+(i===0?" cr-feat":"")+(r.isPassed?" cr-passed":r.isDue&&!r.isFr?" cr-due":"")+(r.isFr?" cr-freight":"");
+    row.className=cls;
+    var fh=r.etaLabel.split("").map(function(ch){return"<div class='flap-c"+(ch===":"?" fc-col":"")+"'>"+(ch===" "?"&nbsp;":ch)+"</div>";}).join("");
+    var plat=r.t.plat||"--";
+    var ph=String(plat).split("").map(function(ch){return"<div class='plat-ch'>"+ch+"</div>";}).join("");
+    row.innerHTML="<div class='flap-t'>"+fh+"</div><div class='dest-c'><div class='dest-main"+(r.isFr?" dm-dim":"")+"'>"+r.dirShort+(r.isFr?" FREIGHT":"")+"</div><div class='dest-sub'>"+r.t.hc+" "+r.mvLabel+"</div></div><div class='plat-c'>"+ph+"</div><div class='"+r.scls+"'>"+r.stxt+"</div>";
+    body.appendChild(row);
+  });
+}
+
+function brackets(ref){
+  var r=Math.max(1,ref),lo=Math.max(0,r-3);
+  return[
+    {l:lo+"-"+Math.max(lo,r-1)+" trains",o:3.50,range:[lo,Math.max(lo,r-1)]},
+    {l:r+"-"+(r+1)+" trains",o:1.90,range:[r,r+1]},
+    {l:(r+2)+"-"+(r+3)+" trains",o:2.40,range:[r+2,r+3]},
+    {l:(r+4)+"+ trains",o:3.80,range:[r+4,999]}
+  ];
+}
+
+function bonus(rn,ref){
+  var c=(rn-1)%4;
+  if(c===0)return{id:"freight",name:"Freight Market",q:"Will any freight trains pass MKC this round?",ref:"Last round: "+ref.freight+" freight",opts:[{l:"Yes - freight appears",o:ref.freight>0?1.65:2.40},{l:"No freight this round",o:ref.freight>0?2.40:1.65}],settled:false,result:null};
+  if(c===1)return{id:"first_dir",name:"First Arrival Direction",q:"Which direction will the first train travel?",ref:"Settles on first movement",opts:[{l:"Towards London",o:1.90},{l:"Away from London",o:1.90}],settled:false,result:null};
+  if(c===2)return{id:"plat2",name:"Platform 2 Market",q:"Will platform 2 be used this round?",ref:"Includes platform 2A",opts:[{l:"Yes - platform 2 used",o:1.55},{l:"No platform 2 this round",o:2.60}],settled:false,result:null};
+  return{id:"high_vol",name:"High Volume",q:"Will total trains exceed "+(ref.total+2)+" this round?",ref:"Last round: "+ref.total,opts:[{l:"Over "+(ref.total+2),o:2.80},{l:(ref.total+2)+" or under",o:1.55}],settled:false,result:null};
+}
+
+function buildMarkets(last){
+  var ref=last||{total:6,stop:3,pass:2,toward:3,away:3,freight:1};
+  return[
+    {id:"total",name:"Total Trains",q:"How many trains will pass through MKC in the next 2 minutes?",ref:"Last round: "+ref.total+" trains",opts:brackets(ref.total),settled:false,result:null},
+    {id:"stoppass",name:"Stopping vs Passing",q:"Will more trains stop at MKC or pass through?",ref:"Last round: "+ref.stop+" stopping - "+ref.pass+" passing",opts:[{l:"More Stopping",o:ref.stop>=ref.pass?1.75:2.20},{l:"More Passing",o:ref.stop>=ref.pass?2.20:1.75},{l:"Equal",o:8.00}],settled:false,result:null},
+    {id:"dir",name:"Direction Split",q:"Which direction will dominate this round?",ref:"Last round: "+ref.toward+" toward - "+ref.away+" away",opts:[{l:"More Away from London",o:ref.toward>=ref.away?2.10:1.75},{l:"More Towards London",o:ref.toward>=ref.away?1.75:2.10},{l:"Equal split",o:7.50}],settled:false,result:null},
+    bonus(rNum,ref)
+  ];
+}
+
+function settle(counts,fDir,p2){
+  markets.forEach(function(m){
+    if(m.settled)return;m.settled=true;
+    if(m.id==="total"){var wi=m.opts.findIndex(function(o){return counts.total>=o.range[0]&&counts.total<=o.range[1]});m.result=wi>=0?wi:m.opts.length-1;}
+    else if(m.id==="stoppass"){m.result=counts.stop>counts.pass?0:counts.pass>counts.stop?1:2;}
+    else if(m.id==="dir"){m.result=counts.away>counts.toward?0:counts.toward>counts.away?1:2;}
+    else if(m.id==="freight"){m.result=counts.freight>0?0:1;}
+    else if(m.id==="first_dir"){if(!fDir){m.settled=false;return;}m.result=fDir==="T"?0:1;}
+    else if(m.id==="plat2"){m.result=p2?0:1;}
+    else if(m.id==="high_vol"){var thr=parseInt(m.opts[0].l.split(" ")[1]);m.result=counts.total>thr?0:1;}
+    // Apply result to any placed bet on this market
+    var mb=mBets[m.id];
+    if(mb&&mb.placed){
+      mb.result=m.result===mb.optionIdx?"won":"lost";
+      if(mb.result==="won"){bal+=mb.stake*mb.odds;updateBal();}
+    }
+  });
+}
+
+function renderMkts(){
+  var g=document.getElementById("mktGrid");g.innerHTML="";
+  markets.forEach(function(m){
+    var card=document.createElement("div");card.className="mkt-card";
+    var mb=mBets[m.id];
+    var won=m.settled&&mb&&mb.placed&&m.result===mb.optionIdx;
+    var lost=m.settled&&mb&&mb.placed&&m.result!==mb.optionIdx;
+    if(won)card.classList.add("mc-win");if(lost)card.classList.add("mc-lose");
+    var badge=m.settled?(mb&&mb.placed?(won?"<span class='mc-badge mcb-won'>Won</span>":"<span class='mc-badge mcb-lost'>Lost</span>"):"<span class='mc-badge mcb-closed'>Settled</span>"):phase==="betting"?"<span class='mc-badge mcb-open'>Open</span>":"<span class='mc-badge mcb-closed'>Closed</span>";
+    var h="<div class='mc-head'><span class='mc-name'>"+m.name+"</span>"+badge+"</div><div class='mc-q'>"+m.q+"</div><div class='mc-ref'>"+m.ref+"</div><div class='mc-opts'>";
+    m.opts.forEach(function(opt,i){
+      var isSel=mb&&mb.optionIdx===i&&!mb.placed;
+      var isWin=m.settled&&m.result===i;
+      var dis=phase!=="betting"||( mb&&mb.placed);
+      var cls=(isSel)?" sel":(dis?" dis":"");
+      h+="<button class='mc-opt"+cls+"' data-mid='"+m.id+"' data-idx='"+i+"' data-odds='"+opt.o+"' data-lbl='"+encodeURIComponent(opt.l)+"'><span class='opt-lbl'>"+opt.l+(isWin?" <span style='display:inline-block;background:var(--green);color:#fff;font-size:8px;padding:1px 5px;margin-left:6px;vertical-align:middle;letter-spacing:.04em'>&#10003; RESULT</span>":"")+"</span><span class='opt-odds'>"+opt.o.toFixed(2)+"x</span></button>";
+    });
+    h+="</div>";
+    if(phase==="betting"&&mb&&!mb.placed){
+      h+="<div class='mc-bet'>"
+        +"<div class='mc-bet-row'><span class='mc-bet-lbl'>Stake &pound;</span>"
+        +"<input class='mc-bet-input' id='stake_"+m.id+"' type='number' placeholder='0.00' min='0.5' max='500' step='0.5'>"
+        +"<div class='mc-bet-qs'>"
+        +"<button class='mc-bet-q' data-qmid='"+m.id+"' data-qval='2'>£2</button>"
+        +"<button class='mc-bet-q' data-qmid='"+m.id+"' data-qval='5'>£5</button>"
+        +"<button class='mc-bet-q' data-qmid='"+m.id+"' data-qval='10'>£10</button>"
+        +"</div></div>"
+        +"<div class='mc-bet-ret'><span class='mc-bet-ret-lbl'>Potential return</span><span class='mc-bet-ret-val' id='ret_"+m.id+"'>--</span></div>"
+        +"<button class='mc-place-btn' id='pbtn_"+m.id+"' disabled data-pmid='"+m.id+"'>Confirm Bet &rarr;</button>"
+        +"</div>";
+    }
+    if(mb&&mb.placed&&!m.settled){
+      h+="<div class='mc-placed-row'><span class='mc-placed-lbl'>&#10003; "+mb.label+"</span><span class='mc-placed-ret'>&pound;"+mb.stake.toFixed(2)+" &rarr; &pound;"+(mb.stake*mb.odds).toFixed(2)+"</span></div>";
+      // Live tracking — show how the bet is tracking based on current counts
+      var tracking="";var tClass="mct-close";
+      if(m.id==="total"){
+        var need=mb.optionIdx;var opts=m.opts;var lo=opts[need].range[0];var hi=opts[need].range[1];
+        if(cur.total<lo){tracking="Need "+(lo-cur.total)+" more · currently "+cur.total;tClass="mct-losing";}
+        else if(cur.total>hi){tracking="Over range · currently "+cur.total;tClass="mct-losing";}
+        else{tracking="On track · "+cur.total+" trains so far";tClass="mct-winning";}
+      }else if(m.id==="stoppass"){
+        if(mb.optionIdx===0)tracking="Stopping: "+cur.stop+" · Passing: "+cur.pass+(cur.stop>cur.pass?" \u2713 Winning":" \u2717 Behind");
+        else if(mb.optionIdx===1)tracking="Passing: "+cur.pass+" · Stopping: "+cur.stop+(cur.pass>cur.stop?" \u2713 Winning":" \u2717 Behind");
+        else tracking="Stopping: "+cur.stop+" · Passing: "+cur.pass+(cur.stop===cur.pass?" \u2713 Equal":" Not equal yet");
+        tClass=tracking.indexOf("\u2713")>=0?"mct-winning":"mct-losing";
+      }else if(m.id==="dir"){
+        if(mb.optionIdx===0)tracking="Away: "+cur.away+" · London: "+cur.toward+(cur.away>cur.toward?" \u2713 Winning":" \u2717 Behind");
+        else if(mb.optionIdx===1)tracking="London: "+cur.toward+" · Away: "+cur.away+(cur.toward>cur.away?" \u2713 Winning":" \u2717 Behind");
+        else tracking="London: "+cur.toward+" · Away: "+cur.away+(cur.toward===cur.away?" \u2713 Equal":" Not equal yet");
+        tClass=tracking.indexOf("\u2713")>=0?"mct-winning":"mct-losing";
+      }else if(m.id==="freight"){
+        if(mb.optionIdx===0)tracking=cur.freight>0?"\u2713 Freight seen ("+cur.freight+")":"\u2717 No freight yet";
+        else tracking=cur.freight>0?"\u2717 Freight appeared ("+cur.freight+")":"\u2713 No freight so far";
+        tClass=tracking.indexOf("\u2713")>=0?"mct-winning":"mct-losing";
+      }else if(m.id==="first_dir"){
+        tracking=firstDir?("First train: "+(firstDir==="T"?"Towards London":"Away from London")):"Waiting for first train\u2026";
+        if(firstDir){tClass=(firstDir==="T"&&mb.optionIdx===0)||(firstDir==="A"&&mb.optionIdx===1)?"mct-winning":"mct-losing";}
+      }else if(m.id==="plat2"){
+        if(mb.optionIdx===0)tracking=plat2?"\u2713 Platform 2 used":"\u2717 Platform 2 not yet used";
+        else tracking=plat2?"\u2717 Platform 2 was used":"\u2713 Platform 2 clear so far";
+        tClass=tracking.indexOf("\u2713")>=0?"mct-winning":"mct-losing";
+      }else if(m.id==="high_vol"){
+        var thr2=parseInt(m.opts[0].l.split(" ")[1]);
+        if(mb.optionIdx===0)tracking=cur.total>thr2?"\u2713 Over threshold ("+cur.total+")":"\u2717 Currently "+cur.total+" · need >"+(thr2);
+        else tracking=cur.total>thr2?"\u2717 Over threshold ("+cur.total+")":"\u2713 Currently "+cur.total+" \u2264 "+thr2;
+        tClass=tracking.indexOf("\u2713")>=0?"mct-winning":"mct-losing";
+      }
+      if(tracking){h+="<div class='mc-tracking'><span class='mct-lbl'>Live</span><span class='"+tClass+"'>"+tracking+"</span></div>";}
+    }
+    if(m.settled&&mb&&mb.placed){
+      var aOpt=m.opts[m.result];
+      h+="<div class='mc-res'><span class='mrr-lbl'>Pick: "+mb.label+"</span><span class='mrr-lbl'>Actual: "+(aOpt?aOpt.l:"?")+"</span><span class='"+(won?"mrr-win":"mrr-lose")+"'>"+(won?"&#10003; +&pound;"+(mb.stake*mb.odds).toFixed(2):"&#10007; -&pound;"+mb.stake.toFixed(2))+"</span></div>";
+    }
+    card.innerHTML=h;
+    g.appendChild(card);
+    // Wire event listeners after DOM insertion
+    card.querySelectorAll(".mc-opt[data-mid]").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        var mid=btn.getAttribute("data-mid");
+        var idx=parseInt(btn.getAttribute("data-idx"));
+        var odds=parseFloat(btn.getAttribute("data-odds"));
+        var lbl=decodeURIComponent(btn.getAttribute("data-lbl"));
+        selectOpt(mid,idx,odds,lbl);
+      });
+    });
+    card.querySelectorAll(".mc-bet-q[data-qmid]").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        qsMkt(btn.getAttribute("data-qmid"),parseFloat(btn.getAttribute("data-qval")));
+      });
+    });
+    var inp=card.querySelector(".mc-bet-input");
+    if(inp){
+      var mid=m.id;
+      inp.addEventListener("input",function(){updateMktRet(mid);});
+      // Restore stake if already set
+      if(mb&&mb.stake>0){inp.value=mb.stake;updateMktRet(mid);}
+    }
+    var pbtn=card.querySelector(".mc-place-btn[data-pmid]");
+    if(pbtn){
+      var mid2=m.id;
+      pbtn.addEventListener("click",function(){placeMktBet(mid2);});
+    }
+  });
+  updateSlipSummary();
+}
+
+function selectOpt(mid,idx,odds,lbl){
+  if(phase!=="betting")return;
+  var mb=mBets[mid];
+  if(mb&&mb.placed)return;
+  if(mb&&mb.optionIdx===idx){
+    delete mBets[mid];
+  }else{
+    var prevStake=(mb&&mb.stake)||0;
+    mBets[mid]={optionIdx:idx,odds:odds,label:lbl,stake:prevStake,placed:false,result:null};
+  }
+  renderMkts();
+}
+
+function qsMkt(mid,v){
+  if(!mBets[mid])return;
+  mBets[mid].stake=v;
+  var inp=document.getElementById("stake_"+mid);
+  if(inp)inp.value=v;
+  updateMktRet(mid);
+}
+
+function updateMktRet(mid){
+  var mb=mBets[mid];if(!mb)return;
+  var inp=document.getElementById("stake_"+mid);
+  var stake=inp?parseFloat(inp.value)||0:mb.stake||0;
+  mb.stake=stake;
+  var retEl=document.getElementById("ret_"+mid);
+  var btnEl=document.getElementById("pbtn_"+mid);
+  if(retEl)retEl.innerHTML=stake>0?"&pound;"+(stake*mb.odds).toFixed(2):"--";
+  if(btnEl)btnEl.disabled=stake<=0||stake>bal;
+}
+
+function placeMktBet(mid){
+  var mb=mBets[mid];if(!mb)return;
+  var inp=document.getElementById("stake_"+mid);
+  var stake=inp?parseFloat(inp.value)||0:mb.stake||0;
+  if(!stake||stake<=0||stake>bal)return;
+  mb.stake=stake;
+  bal-=stake;updateBal();
+  mb.placed=true;
+  renderMkts();
+}
+
+function updateSlipSummary(){
+  var placed=Object.entries(mBets).filter(function(e){return e[1].placed;});
+  var total=placed.reduce(function(a,e){return a+e[1].stake;},0);
+  var potTotal=placed.reduce(function(a,e){return a+e[1].stake*e[1].odds;},0);
+  var sumEl=document.getElementById("slipSummary");
+  var listEl=document.getElementById("slipBetsList");
+  // Update sticky bar
+  var sb=document.getElementById("stickyBar");
+  if(sb){
+    if(placed.length&&phase==="settling"){
+      sb.style.display="flex";
+      document.getElementById("sbBets").textContent=placed.length+" bet"+(placed.length>1?"s":"");
+      document.getElementById("sbStaked").innerHTML="&pound;"+total.toFixed(2)+" staked";
+      document.getElementById("sbPot").innerHTML="&pound;"+potTotal.toFixed(2);
+    }else{
+      sb.style.display="none";
+    }
+  }
+  if(!placed.length){
+    if(sumEl)sumEl.innerHTML="No bets placed";
+    if(listEl)listEl.innerHTML="";
+    return;
+  }
+  if(sumEl)sumEl.innerHTML="<strong>"+placed.length+" bet"+(placed.length>1?"s":"")+"</strong> &middot; &pound;"+total.toFixed(2)+" staked";
+  if(listEl){
+    listEl.innerHTML=placed.map(function(e){
+      var mid=e[0];var b=e[1];
+      var m=markets.find(function(x){return x.id===mid;});
+      var mName=m?m.name:"Market";
+      // Truncate label to keep it on one line
+      var shortLbl=b.label.length>20?b.label.substring(0,19)+"\u2026":b.label;
+      var valCls="slip-row-val";var lblCls="slip-row-lbl";var val="";
+      if(b.result==="won"){valCls+=" won";lblCls+=" won";val="+&pound;"+(b.stake*b.odds).toFixed(2);}
+      else if(b.result==="lost"){valCls+=" lost";lblCls+=" lost";val="-&pound;"+b.stake.toFixed(2);}
+      else val="&pound;"+(b.stake*b.odds).toFixed(2);
+      return"<div class='slip-row'><span class='"+lblCls+"'>"+mName+" &middot; "+shortLbl+"</span><span class='"+valCls+"'>"+val+"</span></div>";
+    }).join("");
+  }
+}
+
+function qs(v){} // kept for compatibility
+
+function setPhase(p){
+  phase=p;
+  var pl=document.getElementById("phLbl");
+  var tl=document.getElementById("tLbl");
+  var board=document.getElementById("boardRows");
+  var colHds=document.getElementById("cabColHds");
+  var placeholder=document.getElementById("cabPlaceholder");
+  if(p==="betting"){
+    pl.textContent="Betting Open";pl.className="rs-phase ph-betting";
+    tl.textContent="Betting closes in";
+    document.getElementById("liveCounter").style.display="none";
+    document.getElementById("evFeed").style.display="none";
+    document.getElementById("resBanner").className="result-banner";
+    document.getElementById("slipDiv").style.display="";
+    document.getElementById("mktSt").textContent="Place your bets";
+    // Hide board, show placeholder
+    board.style.display="none";
+    colHds.style.display="none";
+    placeholder.style.display="flex";
+    var cabSub=document.getElementById("cabSub");if(cabSub)cabSub.textContent="";
+    var sbEl=document.getElementById("stickyBar");if(sbEl)sbEl.style.display="none";
+  }else if(p==="settling"){
+    pl.textContent="Round Live";pl.className="rs-phase ph-settling";
+    tl.textContent="Round closes in";
+    document.getElementById("liveCounter").style.display="grid";
+    document.getElementById("evFeed").style.display="block";
+    document.getElementById("slipDiv").style.display="";
+    document.getElementById("mktSt").textContent="Round in progress - markets closed";
+    board.style.display="";
+    colHds.style.display="grid";
+    placeholder.style.display="none";
+    var cabSub2=document.getElementById("cabSub");if(cabSub2)cabSub2.textContent="Milton Keynes Central";
+  }else{
+    pl.textContent="Round Complete";pl.className="rs-phase ph-betting";
+    tl.textContent="Next round starts in";
+    board.style.display="";
+    colHds.style.display="grid";
+    placeholder.style.display="none";
+    var cabSub3=document.getElementById("cabSub");if(cabSub3)cabSub3.textContent="Milton Keynes Central";
+  }
+}
+
+function showResults(){
+  var placed=Object.entries(mBets).filter(function(e){return e[1].placed;});
+  if(!placed.length){startNewRound();return;}
+  var totalStaked=placed.reduce(function(a,e){return a+e[1].stake;},0);
+  var wonBets=placed.filter(function(e){return e[1].result==="won";});
+  var totalReturned=wonBets.reduce(function(a,e){return a+e[1].stake*e[1].odds;},0);
+  var wonCount=wonBets.length;
+  var allWon=wonCount===placed.length;
+  var net=totalReturned-totalStaked;
+  var rb=document.getElementById("resBanner");
+  rb.className="result-banner show "+(allWon?"rb-win":wonCount>0?"rb-partial":"rb-lose");
+  document.getElementById("rbIcon").textContent=allWon?"\uD83C\uDF89":wonCount>0?"\uD83D\uDC4D":"\uD83D\uDE14";
+  document.getElementById("rbLbl").textContent=allWon?"All bets won!":wonCount>0?wonCount+"/"+placed.length+" bets won":"Better luck next round";
+  document.getElementById("rbVal").innerHTML=(net>=0?"+":"")+net.toFixed(2).replace(/^(-?)(\d)/,"$1&pound;$2");
+  document.getElementById("rbDet").innerHTML=wonCount+"/"+placed.length+" correct &middot; &pound;"+totalStaked.toFixed(2)+" staked";
+  sessionPnL+=net;
+  updateBal();
+  // History: show net with + or - and colour by profit/loss
+  var histLbl="R"+rNum+" "+(net>=0?"+":"-")+"\u00a3"+Math.abs(net).toFixed(2);
+  betHist.unshift({w:net>=0,l:histLbl});
+  renderHist();
+  updateSlipSummary();
+  setTimeout(function(){
+    var rb2=document.getElementById("resBanner");
+    if(rb2)rb2.scrollIntoView({behavior:"smooth",block:"start"});
+  },300);
+}
+
+function startNewRound(){
+  lastRnd={total:cur.total,stop:cur.stop,pass:cur.pass,toward:cur.toward,away:cur.away,freight:cur.freight};
+  cur={total:0,stop:0,pass:0,toward:0,away:0,freight:0};
+  baseline={total:0,stop:0,pass:0,toward:0,away:0,freight:0};
+  mBets={};loggedHc=new Set();firstDir=null;plat2=false;rNum++;
+  windowIdx=(windowIdx+1)%WINDOWS.length;
+  document.getElementById("rNum").textContent=rNum;
+  document.getElementById("mktR").textContent=rNum;
+  document.getElementById("evBody").innerHTML="";
+  document.getElementById("slipDiv").style.display="";
+  document.getElementById("resBanner").className="result-banner";
+  updateLC();updateLastStrip();
+  markets=buildMarkets(lastRnd);
+  setPhase("betting");timer=60;renderMkts();updateSlipSummary();
+}
+
+function updateLC(){
+  document.getElementById("lcT").textContent=cur.total;
+  document.getElementById("lcS").textContent=cur.stop;
+  document.getElementById("lcP").textContent=cur.pass;
+  document.getElementById("lcTw").textContent=cur.toward;
+  document.getElementById("lcAw").textContent=cur.away;
+  document.getElementById("lcFr").textContent=cur.freight;
+}
+
+function updateLastStrip(){
+  if(!lastRnd)return;
+  document.getElementById("lrT").textContent=lastRnd.total;
+  document.getElementById("lrS").textContent=lastRnd.stop;
+  document.getElementById("lrP").textContent=lastRnd.pass;
+  document.getElementById("lrTw").textContent=lastRnd.toward;
+  document.getElementById("lrA").textContent=lastRnd.away;
+  document.getElementById("lrF").textContent=lastRnd.freight;
+}
+
+function updateBal(){
+  document.getElementById("balD").innerHTML="&pound;"+bal.toFixed(2);
+  var pnl=document.getElementById("pnlInd");
+  if(!pnl)return;
+  if(sessionPnL===0){pnl.style.display="none";return;}
+  pnl.style.display="inline";
+  pnl.style.color=sessionPnL>=0?"var(--greenlt)":"var(--redlt)";
+  pnl.textContent=(sessionPnL>=0?"+":"")+"\u00a3"+Math.abs(sessionPnL).toFixed(2);
+}
+
+function renderHist(){
+  var bar=document.getElementById("histBar");
+  bar.innerHTML="<span class='hist-lbl'>History:</span>";
+  betHist.slice(0,12).forEach(function(h){
+    var d=document.createElement("div");
+    d.className="hi-dot "+(h.w?"hi-w":"hi-l");
+    d.title=h.l; // tooltip shows amount on hover
+    bar.appendChild(d);
+  });
+}
+
+// Process settling window — check which trains have arrived based on elapsed time
+function processSettlingWindow(){
+  if(phase!=="settling")return;
+  var elapsed=(Date.now()-settleStartTime)/1000;
+  var win=WINDOWS[windowIdx];
+  var body=document.getElementById("evBody");
+  win.trains.forEach(function(t){
+    var scaledT=Math.round(t.t*0.5); // compress to 60s window
+    if(elapsed<scaledT)return; // not yet
+    if(loggedHc.has(t.hc))return; // already logged
+    loggedHc.add(t.hc);
+    var isFr=!t.pass;
+    var isStop=t.mv==="S";
+    if(!isFr){
+      cur.total++;
+      if(isStop)cur.stop++;else cur.pass++;
+      if(t.dir==="T"){cur.toward++;if(!firstDir)firstDir="T";}
+      else{cur.away++;if(!firstDir)firstDir="A";}
+      if(t.plat==="2"||t.plat==="2A")plat2=true;
+    }else{cur.freight++;cur.total++;}
+    updateLC();
+    // Flash total
+    var tc=document.getElementById("lcT").parentElement;
+    tc.classList.add("lc-flash");setTimeout(function(){tc.classList.remove("lc-flash");},800);
+    // Refresh markets to update tracking indicators
+    renderMkts();
+    // Add event row
+    var bc=isFr?"ev-freight":isStop?"ev-stop":"ev-pass";
+    var bt=isFr?"FREIGHT":isStop?"ARRIVED":"PASSED THROUGH";
+    var desc=(t.dir==="T"?"TOWARDS LONDON":"AWAY FROM LONDON")+(t.plat?" P"+t.plat:"");
+    var row=document.createElement("div");row.className="ev-row";
+    row.innerHTML="<span class='ev-time'>"+new Date().toTimeString().slice(0,5)+"</span><span class='ev-badge "+bc+"'>"+bt+"</span><span class='ev-desc'>"+t.hc+" "+desc+"</span>";
+    body.prepend(row);
+  });
+}
+
+function tickTimer(){
+  if(timer>0)timer--;
+  var td=document.getElementById("tDisp");
+  td.textContent=timer;
+  td.className=(timer<=10&&timer>0&&phase!=="results")?"rs-timer t-urgent":phase==="results"?"rs-timer t-urgent":"rs-timer";
+  if(phase==="betting"&&timer===0){
+    setPhase("settling");
+    timer=60;
+    settleStartTime=Date.now();
+    cur={total:0,stop:0,pass:0,toward:0,away:0,freight:0};
+    loggedHc=new Set();firstDir=null;plat2=false;
+    updateLC();
+  }else if(phase==="settling"&&timer===0){
+    settle(cur,firstDir,plat2);renderMkts();setPhase("results");showResults();timer=20;
+  }else if(phase==="results"&&timer===0){
+    startNewRound();
+  }
+  if(phase==="settling"){
+    processSettlingWindow();
+    var elapsed=(Date.now()-settleStartTime)/1000;
+    renderBoardRows(getBoardRows(WINDOWS[windowIdx],elapsed));
+  }else if(phase==="results"){
+    var elapsedR=(Date.now()-settleStartTime)/1000;
+    renderBoardRows(getBoardRows(WINDOWS[windowIdx],elapsedR));
+  }
+}
+
+// INIT — start with a fresh round, use clock to pick which window's data
+function init(){
+  // Use clock to pick starting window so data varies by time of day
+  windowIdx=getCurrentWindowIdx();
+
+  // Last round is previous window — always shown immediately on load
+  var prevIdx=(windowIdx-1+WINDOWS.length)%WINDOWS.length;
+  lastRnd=countsFromWindow(WINDOWS[prevIdx]);
+  updateLastStrip();
+
+  // Always start with a fresh full 60s betting window
+  // Clock anchoring is used for window DATA not for phase timing
+  markets=buildMarkets(lastRnd);
+  timer=60;
+  setPhase("betting");
+  renderMkts();updateSlipSummary();renderHist();
+  setInterval(tickTimer,1000);
+}
+
+init();
+</script>
+</body>
+</html>
