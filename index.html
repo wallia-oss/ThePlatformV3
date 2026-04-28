@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{
+  --concrete:#EFE8DB;--concrete-2:#F5EFE4;--paper:#FAF6EE;
+  --ink:#1F2329;--steel:#5A6370;--steel-2:#8B92A1;--steel-3:#B8BEC8;--rule:#D8D0C0;
+  --accent:#8B1538;--accent-dk:#641025;--green:#2E6F4C;--red:#B33931;--gold:#C4922A;
+  --bg:#1E1510;--bg2:#160F08;--bg3:#2A2018;
+  --display:'DM Serif Display',Georgia,serif;
+  --body:'DM Sans',-apple-system,sans-serif;
+  --mono:'DM Mono','SF Mono',ui-monospace,monospace;
+  --row-h:82px;--dot-x:79.5px;--dot-y:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);font-family:var(--body);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+
+/* ── SCREEN SYSTEM ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+#screen-splash.active{display:flex}
+
+/* ════════════════════════════════════════
+   SPLASH SCREEN
+════════════════════════════════════════ */
+#screen-splash{
+  background:var(--bg2);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:100vh;position:relative;overflow:hidden;
+}
+#screen-splash.active{display:flex}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ── track bed ── */
+.splash-track-wrap{
+  position:absolute;bottom:30%;left:0;right:0;
+  height:24px;pointer-events:none;overflow:hidden;
+}
+.splash-rail{
+  position:absolute;left:0;right:0;height:2px;
+  background:rgba(196,146,42,0.2);
+}
+.splash-rail-top{top:2px}
+.splash-rail-bot{bottom:2px}
+.splash-sleepers{
+  position:absolute;inset:0;
+  display:flex;align-items:center;
+  overflow:hidden;
+}
+.splash-sleeper{
+  width:4px;height:16px;flex-shrink:0;
+  background:rgba(196,146,42,0.1);
+  margin-right:16px;
+}
+
+/* ── train ── */
+.splash-train{
+  position:absolute;
+  bottom:calc(30% + 4px);
+  left:-340px;
+  display:flex;align-items:flex-end;
+  animation:trainPass 3.2s cubic-bezier(0.4,0,0.6,1) 0.6s both;
+  pointer-events:none;
+}
+@keyframes trainPass{
+  0%{left:-340px;opacity:0}
+  8%{opacity:1}
+  88%{opacity:1}
+  100%{left:calc(100% + 40px);opacity:0}
+}
+/* train SVG inline — Intercity silhouette */
+.splash-train svg{display:block}
+
+/* steam/motion lines */
+.splash-motion{
+  position:absolute;right:calc(100% - 8px);top:8px;
+  display:flex;flex-direction:column;gap:5px;
+  opacity:0;
+  animation:motionShow 3.2s 0.6s both;
+}
+@keyframes motionShow{0%,7%{opacity:0}15%,85%{opacity:1}100%{opacity:0}}
+.sm-line{
+  height:2px;background:linear-gradient(to left,rgba(196,146,42,0.5),transparent);
+  animation:smScroll 0.3s linear infinite;
+}
+.sm-line:nth-child(1){width:40px;animation-delay:0s}
+.sm-line:nth-child(2){width:28px;animation-delay:.08s}
+.sm-line:nth-child(3){width:18px;animation-delay:.15s}
+@keyframes smScroll{from{transform:scaleX(1)}to{transform:scaleX(0.6)}}
+
+/* ── content ── */
+.splash-inner{
+  position:relative;z-index:2;
+  text-align:center;padding:40px 24px;
+  animation:splashIn 1s cubic-bezier(0.16,1,0.3,1) both;
+  margin-bottom:80px;
+}
+@keyframes splashIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.splash-eyebrow{
+  font-family:var(--mono);font-size:10px;font-weight:600;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(196,146,42,0.6);margin-bottom:18px;
+}
+.splash-logo{
+  font-family:var(--display);font-size:clamp(3rem,8vw,5.5rem);
+  color:var(--concrete);line-height:1;margin-bottom:6px;
+}
+.splash-logo em{font-style:italic;color:#C44055}
+.splash-rule{
+  width:48px;height:1px;
+  background:linear-gradient(to right,transparent,rgba(196,146,42,0.5),transparent);
+  margin:18px auto;
+}
+.splash-tagline{
+  font-family:var(--mono);font-size:13px;color:var(--steel-2);
+  letter-spacing:.04em;line-height:1.6;
+  max-width:300px;margin:0 auto 28px;
+}
+.splash-tagline strong{color:var(--concrete-2);font-weight:600}
+.splash-progress{
+  width:180px;height:2px;background:rgba(255,255,255,0.07);
+  margin:0 auto 14px;position:relative;overflow:hidden;
+}
+.splash-progress-fill{
+  position:absolute;left:0;top:0;bottom:0;
+  background:linear-gradient(to right,var(--accent),var(--gold));
+  width:0%;transition:width .1s linear;
+}
+.splash-skip{
+  background:none;border:none;
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(139,146,161,0.4);cursor:pointer;padding:4px 8px;transition:color .2s;
+}
+.splash-skip:hover{color:var(--steel-2)}
+
+/* ════════════════════════════════════════
+   LOBBY SCREEN
+════════════════════════════════════════ */
+#screen-lobby{background:var(--bg2);min-height:100vh}
+.lobby-header{
+  padding:16px 20px;background:var(--bg2);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.lobby-brand{font-family:var(--display);font-size:20px;color:var(--concrete)}
+.lobby-brand em{font-style:italic;color:#C44055}
+.lobby-live{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#2E6F4C}
+.lobby-live-dot{width:6px;height:6px;border-radius:50%;background:#2E6F4C;animation:livepulse 2s ease-in-out infinite}
+.lobby-intro{max-width:600px;margin:0 auto;padding:24px 20px 16px;}
+.lobby-eyebrow{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(196,146,42,0.65);margin-bottom:8px;}
+.lobby-title{font-family:var(--display);font-size:clamp(1.5rem,4vw,2.2rem);color:var(--concrete);line-height:1.15;margin-bottom:8px;}
+.lobby-title em{font-style:italic;color:#C44055}
+.lobby-desc{font-family:var(--mono);font-size:11px;color:var(--steel-2);line-height:1.6;}
+
+/* ── MODE CARDS ── */
+.modes-grid{max-width:600px;margin:0 auto;padding:8px 20px 40px;display:flex;flex-direction:column;gap:8px;}
+.mode-card{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  position:relative;overflow:hidden;
+  transition:border-color .2s,transform .15s;
+}
+.mode-card.mc-live{cursor:pointer;}
+.mode-card.mc-live:hover{border-color:rgba(139,21,56,0.5);transform:translateY(-1px)}
+.mode-card.mc-soon{opacity:.45;cursor:default}
+.mode-card.mc-journey{border-left:3px solid #8B1538}
+.mode-card.mc-acca{border-left:3px solid var(--gold)}
+.mode-card.mc-station{border-left:3px solid #3A6B8A}
+.mode-card.mc-driver{border-left:3px solid #C4922A}
+.mc-ribbon{
+  position:absolute;top:12px;right:12px;
+  font-family:var(--mono);font-size:9px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;
+}
+.mc-ribbon-live{background:rgba(46,111,76,0.15);color:#2E6F4C;border:1px solid rgba(46,111,76,0.3)}
+.mc-ribbon-soon{background:rgba(90,99,112,0.15);color:var(--steel-2);border:1px solid rgba(90,99,112,0.25)}
+.mc-body{padding:16px 16px 12px;padding-right:90px;}
+.mc-title-row{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.mc-icon{width:36px;height:36px;flex-shrink:0;opacity:0.9}
+.mc-mode-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin-bottom:4px;}
+.mode-card.mc-journey .mc-mode-label{color:#C44055}
+.mode-card.mc-acca .mc-mode-label{color:var(--gold)}
+.mode-card.mc-station .mc-mode-label{color:#5A9BBF}
+.mode-card.mc-driver .mc-mode-label{color:#C4922A}
+.mc-title{font-family:var(--display);font-size:1.45rem;color:var(--concrete);line-height:1.1;margin-bottom:4px;}
+.mc-tagline{font-family:var(--mono);font-size:10px;font-style:italic;color:var(--steel-2);margin-bottom:0;line-height:1.5;}
+.mc-foot{
+  padding:10px 16px;
+  background:rgba(0,0,0,0.2);
+  border-top:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.mc-tags{display:flex;gap:6px;flex-wrap:wrap}
+.mc-tag{font-family:var(--mono);font-size:9px;color:var(--steel);padding:2px 7px;border:1px solid rgba(255,255,255,0.08);}
+.mc-cta{
+  background:var(--accent);color:var(--paper);border:none;
+  padding:7px 16px;font-family:var(--mono);font-size:10px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .15s;flex-shrink:0;
+}
+.mc-cta:hover{background:var(--accent-dk)}
+.mc-cta-soon{font-family:var(--mono);font-size:9px;color:var(--steel);letter-spacing:.1em;text-transform:uppercase;}
+
+/* ════════════════════════════════════════
+   ACCA SCREEN (embedded — full UI)
+════════════════════════════════════════ */
+#screen-acca{background:#16213e;min-height:100vh}
+
+/* all acca styles scoped under #screen-acca */
+#screen-acca *{box-sizing:border-box}
+.acca-app-header{
+  position:sticky;top:0;z-index:300;
+  height:52px;
+  background:#1a1a2e;
+  border-bottom:2px solid #C4922A;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+  box-shadow:0 2px 16px rgba(0,0,0,0.5);
+}
+.acca-hdr-left{display:flex;align-items:center;gap:10px}
+.acca-back{
+  background:none;border:none;
+  font-family:var(--mono);font-size:10px;font-weight:600;
+  color:rgba(239,232,219,0.5);letter-spacing:.08em;
+  cursor:pointer;padding:4px 8px 4px 0;
+  border-right:1px solid rgba(255,255,255,0.1);
+  margin-right:4px;
+  transition:color .15s;
+}
+.acca-back:hover{color:var(--concrete)}
+.acca-hdr-brand{font-family:var(--display);font-size:1.1rem;color:var(--concrete)}
+.acca-hdr-brand em{font-style:italic;color:#C44055}
+.acca-hdr-mode{
+  font-family:var(--mono);font-size:0.62rem;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:#1a1a2e;background:#C4922A;
+  padding:3px 8px;
+}
+.acca-hdr-right{display:flex;align-items:center;gap:16px}
+@media(max-width:720px){
+  .acca-hdr-brand{display:none}
+  .acca-app-header{padding:0 12px}
+  .acca-hdr-left{gap:8px}
+}
+.acca-hdr-live{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:0.7rem;color:#00b86c;font-weight:600;letter-spacing:.08em}
+.acca-live-dot{width:7px;height:7px;border-radius:50%;background:#00b86c;animation:accaPulse 1.8s ease-in-out infinite}
+@keyframes accaPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.acca-hdr-bal{font-family:var(--mono);font-size:0.8rem;color:#a0a0c0}
+.acca-hdr-bal strong{color:#C4922A;font-size:1rem;font-weight:700}
+
+/* acca layout */
+.acca-body{display:flex;height:calc(100vh - 52px);overflow:hidden}
+.acca-markets-col{flex:1;overflow-y:auto;background:#16213e}
+.acca-slip-col{
+  width:460px;flex-shrink:0;
+  background:#252540;
+  border-left:1px solid #2e2e50;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.acca-markets-hdr{
+  padding:12px 16px 10px;background:#1a1a2e;
+  border-bottom:1px solid #2e2e50;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:10;
+}
+.amh-title{font-family:var(--mono);font-size:0.7rem;font-weight:600;color:#a0a0c0;letter-spacing:.1em;text-transform:uppercase}
+.amh-count{font-family:var(--mono);font-size:0.7rem;color:#6060a0}
+.acca-markets-list{padding:8px}
+
+/* train card */
+.atc{
+  background:#1e1e30;border:1px solid #2e2e50;
+  border-radius:6px;margin-bottom:6px;overflow:hidden;
+  transition:border-color .15s;
+}
+.atc:hover{border-color:#3a3a60}
+.atc.atc-added{border-color:#00b86c;border-left:3px solid #00b86c}
+.atc.atc-dis{opacity:.35;pointer-events:none}
+.atc.atc-cls{opacity:.25;pointer-events:none}
+.atc-head{padding:8px 12px 5px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.atc-left{flex:1;min-width:0}
+.atc-op-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.atc-op-pill{font-family:var(--mono);font-size:0.62rem;font-weight:600;letter-spacing:.06em;padding:2px 7px;flex-shrink:0}
+.atc-op-name{font-size:0.72rem;color:#a0a0c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono)}
+.atc-route{font-family:var(--mono);font-size:0.88rem;font-weight:600;color:#e8e8f0;line-height:1.2;display:flex;align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.atc-arrow{color:#6060a0;font-size:0.85rem}
+.atc-sched{font-family:var(--mono);font-size:0.7rem;color:#a0a0c0;margin-top:2px}
+.atc-sched strong{color:#e8e8f0}
+.atc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.atc-status{font-family:var(--mono);font-size:0.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px}
+.ats-open{background:rgba(0,184,108,0.12);color:#00b86c;border:1px solid rgba(0,184,108,0.3)}
+.ats-soon{background:rgba(196,146,42,0.12);color:#C4922A;border:1px solid rgba(196,146,42,0.3)}
+.ats-closed{background:rgba(224,48,48,0.1);color:#e03030;border:1px solid rgba(224,48,48,0.25)}
+
+/* odds buttons */
+.atc-markets{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#2e2e50;border-top:1px solid #2e2e50}
+.aob{
+  background:#252540;border:none;padding:7px 6px 6px;
+  cursor:pointer;text-align:center;transition:background .1s;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  -webkit-user-select:none;user-select:none;
+}
+.aob:hover:not(.aob-dis):not(.aob-sel){background:#2a2a48}
+.aob:active:not(.aob-dis):not(.aob-sel){background:#303058}
+.aob.aob-sel{background:#0d3d0d;border-top:2px solid #00b86c}
+.aob.aob-dis{opacity:.25;cursor:not-allowed}
+.aob-lbl{font-size:0.6rem;color:#a0a0c0;font-family:var(--mono);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.aob.aob-sel .aob-lbl{color:#00b86c}
+.aob-odds{font-family:var(--mono);font-size:0.9rem;font-weight:600;color:#C4922A;line-height:1}
+.aob.aob-sel .aob-odds{color:#4dff9a}
+.aob-na{font-family:var(--mono);font-size:0.75rem;color:#6060a0}
+
+.atc-added-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:5px 12px;background:rgba(0,184,108,0.08);
+  border-top:1px solid rgba(0,184,108,0.2);
+}
+.atc-added-lbl{font-family:var(--mono);font-size:0.65rem;color:#00b86c;font-weight:600;letter-spacing:.06em}
+.atc-rm{background:none;border:1px solid rgba(224,48,48,0.3);color:#e03030;font-family:var(--mono);font-size:0.62rem;font-weight:600;padding:3px 10px;cursor:pointer;letter-spacing:.06em}
+.atc-rm:hover{background:rgba(224,48,48,0.12)}
+
+/* slip */
+.aslip-hdr{padding:12px 14px 10px;background:#2a2a48;border-bottom:1px solid #2e2e50;flex-shrink:0}
+.aslip-hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.aslip-title{font-family:var(--mono);font-size:0.9rem;font-weight:600;color:#e8e8f0;letter-spacing:.06em;text-transform:uppercase}
+.aslip-count{font-family:var(--mono);font-size:0.65rem;font-weight:600;color:#1a1a2e;background:#C4922A;padding:3px 9px}
+.aslip-count.lc-dim{background:#2a2a48;color:#6060a0}
+.aslip-sub{font-family:var(--mono);font-size:0.65rem;color:#6060a0}
+.aslip-legs{flex:1;overflow-y:auto;padding:8px}
+.aslip-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;font-family:var(--mono);color:#6060a0;text-align:center;padding:24px}
+.aslip-empty-icon{font-size:2rem;opacity:.3}
+.aslip-empty-title{font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em}
+.aslip-empty-sub{font-size:0.68rem;line-height:1.6;color:#6060a0}
+
+/* slip legs */
+.asleg{
+  background:#252540;border:1px solid #2e2e50;
+  border-left:3px solid #C4922A;
+  margin-bottom:6px;overflow:hidden;
+  animation:aSlideIn .2s ease-out;
+}
+@keyframes aSlideIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+.asleg.asl-won{border-left-color:#00b86c;border-color:rgba(0,184,108,0.35);background:rgba(0,184,108,0.07)}
+.asleg.asl-lost{border-left-color:#e03030;border-color:rgba(224,48,48,0.3);background:rgba(224,48,48,0.06)}
+.asleg-head{padding:8px 10px 4px;display:flex;align-items:center;justify-content:space-between}
+.asleg-op{font-family:var(--mono);font-size:0.6rem;color:#6060a0;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.asleg-num{font-family:var(--mono);font-size:0.6rem;color:#C4922A;font-weight:600}
+.asleg-route{padding:0 10px 5px;font-family:var(--mono);font-size:0.85rem;font-weight:600;color:#e8e8f0}
+.asleg-outs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#2e2e50;border-top:1px solid #2e2e50}
+.aso{
+  background:#1e1e30;border:none;padding:7px 4px 6px;
+  cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;
+  transition:background .1s;-webkit-user-select:none;user-select:none;
+}
+.aso:hover:not(.aso-dis):not(.aso-on){background:#2a2a48}
+.aso.aso-on{background:#0d3d0d;border-top:2px solid #00b86c}
+.aso.aso-dis{opacity:.2;cursor:not-allowed}
+.aso-lbl{font-size:0.58rem;font-family:var(--mono);font-weight:600;color:#a0a0c0;letter-spacing:.04em;text-transform:uppercase}
+.aso.aso-on .aso-lbl{color:#00b86c}
+.aso-odds{font-family:var(--mono);font-size:0.82rem;font-weight:600;color:#C4922A}
+.aso.aso-on .aso-odds{color:#4dff9a}
+.asleg-foot{padding:7px 10px;display:flex;align-items:center;justify-content:space-between}
+.asleg-eta{font-size:0.75rem;color:#e8e8f0;font-family:var(--mono);font-weight:600;letter-spacing:.02em}
+.asleg-rm{background:none;border:none;color:#6060a0;font-size:0.62rem;font-family:var(--mono);cursor:pointer;padding:2px 4px}
+.asleg-rm:hover{color:#e03030}
+.asleg-result{padding:8px 10px;background:#1e1e30;border-top:1px solid #2e2e50}
+.asr-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.65rem;margin-bottom:3px}
+.asr-lbl{color:#6060a0}
+.asr-val{color:#e8e8f0;font-weight:600}
+.asr-win{color:#00b86c;font-weight:600}
+.asr-lose{color:#ff6b6b;font-weight:600}
+.asleg-badge{font-family:var(--mono);font-size:0.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px}
+.asb-won{background:#00b86c;color:#fff}
+.asb-lost{background:#e03030;color:#fff}
+.asb-live{background:#C4922A;color:#000;animation:accaPulse 1.2s infinite}
+
+/* slip footer */
+.aslip-foot{padding:12px 14px;background:#1a1a2e;border-top:1px solid #2e2e50;flex-shrink:0}
+.asf-odds-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.asf-lbl{font-family:var(--mono);font-size:0.65rem;color:#a0a0c0;text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+.asf-combined{font-family:var(--mono);font-size:1.8rem;font-weight:600;color:#C4922A;line-height:1}
+.asf-combined.dim{color:#6060a0;font-size:1rem}
+.asf-stake-row{display:flex;gap:6px;margin-bottom:6px}
+.asf-input{
+  flex:1;background:#252540;border:1px solid #3a3a60;
+  color:#e8e8f0;font-family:var(--mono);font-size:1.0rem;font-weight:600;
+  padding:10px 12px;outline:none;transition:border-color .15s;
+}
+.asf-input:focus{border-color:#C4922A}
+.asf-input::placeholder{color:#6060a0;font-weight:400;font-size:0.82rem}
+.asf-qs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:10px}
+.asf-q{
+  background:#252540;border:1px solid #2e2e50;
+  color:#a0a0c0;font-family:var(--mono);font-size:0.72rem;font-weight:600;
+  padding:7px 0;cursor:pointer;text-align:center;transition:all .1s;
+}
+.asf-q:hover{background:#2a2a48;border-color:#3a3a60;color:#e8e8f0}
+.asf-ret-row{display:flex;justify-content:space-between;margin-bottom:10px;align-items:center}
+.asf-ret-lbl{font-family:var(--mono);font-size:0.65rem;color:#a0a0c0}
+.asf-ret-val{font-family:var(--mono);font-size:0.85rem;font-weight:600;color:#e8e8f0}
+.aplace-btn{
+  width:100%;padding:13px;
+  background:#C4922A;border:none;
+  color:#000;font-family:var(--mono);font-size:0.85rem;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;
+  cursor:pointer;transition:all .15s;-webkit-user-select:none;user-select:none;
+}
+.aplace-btn:hover:not(:disabled){background:#D4A240}
+.aplace-btn:disabled{background:#252540;color:#6060a0;cursor:not-allowed}
+
+/* settle bar */
+.asettle-bar{height:3px;background:#2e2e50;flex-shrink:0}
+.asettle-fill{height:100%;background:#00b86c;width:0%;transition:width .5s ease}
+
+/* result banner */
+.arb{display:none;padding:20px 14px;text-align:center;flex-shrink:0}
+.arb.arb-show{display:block}
+.arb-win{background:rgba(0,184,108,0.1);border-bottom:1px solid rgba(0,184,108,0.2)}
+.arb-lose{background:rgba(224,48,48,0.08);border-bottom:1px solid rgba(224,48,48,0.2)}
+.arb-icon{font-size:2rem;margin-bottom:4px}
+.arb-lbl{font-family:var(--mono);font-size:0.65rem;color:#a0a0c0;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.arb-val{font-family:var(--mono);font-size:1.9rem;font-weight:600;line-height:1;margin-bottom:4px}
+.arb-win .arb-val{color:#00b86c}
+.arb-lose .arb-val{color:#e03030}
+.arb-det{font-family:var(--mono);font-size:0.68rem;color:#a0a0c0;margin-bottom:12px}
+.anew-btn{
+  padding:8px 22px;background:transparent;
+  border:1px solid #3a3a60;color:#e8e8f0;
+  font-family:var(--mono);font-size:0.7rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
+}
+.anew-btn:hover{background:#252540}
+
+/* history */
+.ahist-bar{
+  display:flex;gap:5px;padding:8px 12px;
+  overflow-x:auto;border-top:1px solid #2e2e50;
+  flex-shrink:0;background:#1a1a2e;scrollbar-width:none;
+}
+.ahist-bar::-webkit-scrollbar{display:none}
+.ahist-lbl{font-family:var(--mono);font-size:0.6rem;color:#6060a0;align-self:center;flex-shrink:0;text-transform:uppercase;letter-spacing:.06em}
+.ahi{font-family:var(--mono);font-size:0.6rem;padding:3px 8px;flex-shrink:0;font-weight:600}
+.ahi-w{background:rgba(0,184,108,0.15);color:#00b86c}
+.ahi-l{background:rgba(224,48,48,0.12);color:#e03030}
+
+/* mobile acca */
+@media(max-width:720px){
+  .acca-slip-col{display:none}
+  .acca-body{display:block;height:auto;overflow:auto}
+  .acca-markets-col{overflow:visible;padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+
+  /* ── persistent bottom bar ── */
+  .amob-bar{
+    position:fixed;left:0;right:0;bottom:0;z-index:200;
+    height:auto;min-height:64px;
+    padding:0 16px env(safe-area-inset-bottom,0px);
+    background:#1a1a2e;
+    border-top:2px solid #C4922A;
+    box-shadow:0 -6px 24px rgba(0,0,0,0.6);
+    display:flex;align-items:center;
+    gap:12px;
+  }
+  .amob-bar-left{flex:1;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+  .amob-bar-title{font-family:var(--mono);font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a0a0c0;white-space:nowrap;flex-shrink:0}
+  .amob-bar-pill{font-family:var(--mono);font-size:0.62rem;font-weight:700;color:#1a1a2e;background:#C4922A;padding:3px 9px;border-radius:999px;flex-shrink:0}
+  .amob-bar-pill.lp-dim{background:#2a2a48;color:#6060a0}
+  .amob-bar-odds{font-family:var(--mono);font-size:1.1rem;font-weight:700;color:#C4922A;margin-right:4px}
+  .amob-bar-sub{font-family:var(--mono);font-size:0.58rem;color:#6060a0;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+  .amob-view-btn{
+    background:#C4922A;border:none;
+    font-family:var(--mono);font-size:0.7rem;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;
+    color:#000;padding:10px 14px;
+    cursor:pointer;flex-shrink:0;
+    transition:background .15s;white-space:nowrap;
+  }
+  .amob-view-btn:hover{background:#D4A240}
+  .amob-view-btn.vb-dim{background:#252540;color:#6060a0;cursor:default}
+
+  /* ── full-screen slip overlay ── */
+  .amob-slip{
+    position:fixed;inset:0;z-index:300;
+    background:#16213e;
+    display:flex;flex-direction:column;
+    transform:translateY(100%);
+    transition:transform .3s cubic-bezier(0.4,0,0.2,1);
+    overflow:hidden;
+  }
+  .amob-slip.slip-open{transform:translateY(0)}
+
+  /* slip overlay header */
+  .amob-slip-hdr{
+    height:52px;flex-shrink:0;
+    background:#1a1a2e;
+    border-bottom:2px solid #C4922A;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 14px;gap:10px;
+  }
+  .amob-slip-hdr-title{font-family:var(--mono);font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#6060a0;flex-shrink:0}
+  .amob-leg-tracker{display:flex;align-items:center;gap:6px;flex:1;justify-content:center}
+  .amob-slip-close{
+    background:none;border:1px solid #3a3a60;
+    font-family:var(--mono);font-size:0.65rem;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;
+    color:#a0a0c0;padding:6px 12px;cursor:pointer;flex-shrink:0;
+  }
+  .amob-slip-close:hover{color:#e8e8f0;border-color:#6060a0}
+
+  /* slip legs scroll area */
+  .amob-legs-wrap{flex:1;overflow-y:auto;min-height:0;padding:8px}
+}
+@media(min-width:721px){
+  .amob-bar{display:none}
+  .amob-slip{display:none}
+}
+@media(min-width:721px){.amob-slip{display:none}}
+
+/* leg tracker circles — global so desktop slip can use them too */
+.amob-leg-tracker{display:flex;align-items:center;gap:6px}
+.alt-circle{
+  width:14px;height:14px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:7px;font-weight:700;font-family:var(--mono);
+  flex-shrink:0;transition:all .3s ease;
+  position:relative;
+}
+.alt-empty{background:rgba(255,255,255,0.02);border:1.5px solid rgba(255,255,255,0.06)}
+.alt-added{background:rgba(196,146,42,0.2);border:1.5px solid #C4922A}
+.alt-live{background:rgba(196,146,42,0.25);border:1.5px solid #C4922A;animation:altPulse 1.4s ease-in-out infinite}
+.alt-won{background:#2E6F4C;border:1.5px solid #2E6F4C;color:#fff}
+.alt-lost{background:#B33931;border:1.5px solid #B33931;color:#fff}
+@keyframes altPulse{0%,100%{box-shadow:0 0 0 0 rgba(196,146,42,0.4)}50%{box-shadow:0 0 0 4px rgba(196,146,42,0)}}
+
+/* ════════════════════════════════════════
+   JOURNEY SCREEN — scoped styles
+════════════════════════════════════════ */
+#screen-journey{background:#1E1510;min-height:100vh}
+#screen-journey .j-app{width:100%;background:#1E1510;min-height:100vh}
+#screen-journey .j-header{padding:14px 20px 16px;border-bottom:1px solid #2A2820;background:#160F08;display:flex;align-items:center;justify-content:space-between}
+#screen-journey .j-header .brand{font-family:var(--display);font-size:22px;color:#EFE8DB}
+#screen-journey .j-header .brand em{font-style:italic;color:#C44055}
+#screen-journey .j-header .j-back{background:none;border:none;font-family:var(--mono);font-size:10px;font-weight:600;color:rgba(239,232,219,0.5);letter-spacing:.08em;cursor:pointer;padding:4px 8px 4px 0;border-right:1px solid rgba(255,255,255,0.1);margin-right:10px;transition:color .15s}
+#screen-journey .j-header .j-back:hover{color:#EFE8DB}
+#screen-journey .j-header .balance{font-family:var(--mono);font-size:13px;font-weight:600;color:#EFE8DB}
+#screen-journey .j-header .balance-lbl{color:#666;font-weight:400;margin-right:5px}
+/* journey inner screens */
+#j-lobby{max-width:760px;margin:0 auto}
+#j-service{max-width:680px;margin:0 auto;border-left:1px solid var(--rule);border-right:1px solid var(--rule);background:var(--paper);min-height:calc(100vh - 60px)}
+@media(max-width:680px){#j-service{border:none}}
+#screen-journey .j-screen{display:none}
+#screen-journey .j-screen.j-active{display:block}
+/* reuse journey classes — these don't conflict as they use specific class names */
+.on-time{color:#2E6F4C}.late-txt{color:#B33931}
+.back-bar{padding:12px 20px;background:var(--concrete-2);border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center}
+.back-btn{background:none;border:none;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink);cursor:pointer}
+.back-btn::before{content:'← ';color:var(--steel)}
+.sim-bar{padding:8px 20px;background:var(--ink);color:var(--paper);display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10px}
+.sim-now-val{color:#8B1538;font-size:12px;font-weight:600;margin-left:6px}
+.speed-btns{display:flex;gap:4px}
+.speed-btn{background:transparent;border:1px solid var(--steel);color:var(--steel-3);font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 9px;cursor:pointer;letter-spacing:.04em}
+.speed-btn.active{background:#8B1538;border-color:#8B1538;color:var(--paper)}
+.service-hero{padding:16px 20px 14px;background:var(--paper);border-bottom:1px solid var(--rule)}
+.sh-op{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.14em;color:#8B1538;text-transform:uppercase;margin-bottom:6px}
+.sh-route{font-family:var(--display);font-size:21px;line-height:1.1;color:var(--ink);margin-bottom:10px}
+.sh-route .arr{color:var(--steel-2);font-style:italic;margin:0 4px}
+.sh-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;padding-top:10px;border-top:1px dashed var(--rule)}
+.sh-lbl{color:var(--steel-2);margin-right:4px}
+.tabs{display:flex;background:var(--concrete);border-bottom:1px solid var(--rule)}
+.tab{flex:1;padding:13px;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.16em;color:var(--steel);text-transform:uppercase;cursor:pointer;transition:all .15s}
+.tab.active{color:var(--ink);border-bottom-color:#8B1538;background:var(--concrete-2)}
+.pnl-bar{padding:8px 20px;background:var(--concrete-2);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:0;font-family:var(--mono);font-size:11px;color:var(--steel)}
+.pnl-bar-item{flex:1;text-align:center}
+.pnl-bar-item b{display:block;font-family:var(--mono);font-size:13px;color:var(--ink);font-weight:600;margin-top:1px}
+.pnl-bar-sep{color:var(--rule);font-size:16px}
+.pnl-pos{color:#2E6F4C!important}.pnl-neg{color:#B33931!important}
+.map-trigger{margin:14px 20px 0;padding:12px 14px;background:var(--paper);border:1px solid var(--rule);display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s}
+.map-trigger:hover{border-color:var(--ink)}
+.map-trigger-icon{width:28px;height:28px;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.map-trigger-icon svg{width:15px;height:15px;stroke:var(--paper);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.map-trigger-title{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.04em}
+.map-trigger-sub{font-family:var(--mono);font-size:10px;color:var(--steel);margin-top:2px}
+.map-trigger-arrow{font-size:16px;color:var(--steel-2)}
+.route-strip-wrap{padding:14px 20px 0;position:relative}
+.route-line-track{position:absolute;left:calc(var(--dot-x) + 20px - 1px);width:3px;background:var(--steel-3);border-radius:2px;z-index:2}
+.route-line-filled{position:absolute;left:calc(var(--dot-x) + 20px - 1px);width:3px;background:#2E6F4C;border-radius:2px;z-index:3;transition:height .2s linear}
+.route-line-active{position:absolute;left:calc(var(--dot-x) + 20px - 1px);width:3px;background:#8B1538;border-radius:2px;z-index:3;transition:height .2s linear}
+.ckp-row{position:relative;min-height:var(--row-h);display:grid;grid-template-columns:56px 24px 1fr;gap:0 12px;align-items:start;padding-top:4px;transition:background .2s ease}
+.ckp-row:last-child{padding-bottom:16px}
+.ckp-row.sel-row::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(var(--concrete-2),var(--concrete-2)) 0 0/71px 100% no-repeat,linear-gradient(var(--concrete-2),var(--concrete-2)) 89px 0/calc(100% - 89px) 100% no-repeat;}
+.ckp-row.sel-row::before{content:"";position:absolute;left:-20px;top:0;bottom:0;width:3px;background:#8B1538;z-index:3}
+.ckp-row.sel-row>*{position:relative;z-index:1}
+.ckp-row.sel-row>.ckp-dot-col{z-index:4}
+.ckp-times{text-align:right;font-family:var(--mono);font-size:11px;line-height:1.4;padding-top:3px}
+.ckp-sched{color:var(--steel)}
+.ckp-actual{font-weight:600;margin-top:2px;min-height:1.2em}
+.ckp-actual.late{color:#B33931}.ckp-actual.early{color:#2E6F4C}
+.ckp-dot-col{display:flex;justify-content:center;padding-top:4px;position:relative;z-index:4}
+.ckp-dot{width:14px;height:14px;background:var(--concrete);border:2.5px solid var(--steel-3);border-radius:50%;flex-shrink:0;transition:all .3s;position:relative;z-index:5}
+.ckp-dot.passed{background:#2E6F4C;border-color:#2E6F4C}
+.ckp-dot.sel{width:20px;height:20px;background:#8B1538;border-color:#8B1538;border-width:2.5px;margin:-3px 0}
+.ckp-dot.sel::after{content:"";position:absolute;inset:-6px;border:2px solid #8B1538;border-radius:50%;opacity:.5;animation:jSelPulse 1.8s ease-out infinite;pointer-events:none}
+@keyframes jSelPulse{0%{transform:scale(.85);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.ckp-dot.origin{background:var(--ink);border-color:var(--ink)}
+.next-pill{display:inline-flex;align-items:center;padding:2px 7px;background:#8B1538;border:1px solid #8B1538;border-radius:3px;font-family:var(--mono);font-size:9px;color:var(--paper);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.next-pill::before{content:"";display:inline-block;width:5px;height:5px;background:var(--paper);border-radius:50%;margin-right:5px;animation:jNextDot 1.4s ease-in-out infinite}
+@keyframes jNextDot{0%,100%{opacity:1}50%{opacity:.3}}
+.ckp-info{padding-top:2px}
+.ckp-name-row{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:3px}
+.ckp-name{font-family:var(--mono);font-size:14px;color:var(--ink);line-height:1.15;letter-spacing:.04em;font-weight:600}
+.plat-pill{display:inline-flex;align-items:baseline;gap:3px;padding:2px 7px;background:#E8EEF6;border:1px solid #C5D2E3;border-radius:3px;font-family:var(--mono);font-size:9px;color:#3A5578;text-transform:uppercase;letter-spacing:.04em}
+.plat-pill b{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--ink)}
+.ckp-meta{font-family:var(--mono);font-size:10px;color:var(--steel);line-height:1.5}
+.band-pill{display:inline-block;padding:1px 6px;background:var(--concrete-2);border:1px solid var(--rule);border-radius:2px;margin-right:4px;font-size:9px;letter-spacing:.06em;text-transform:uppercase}
+.band-pill.win{background:#E6F0E8;border-color:#2E6F4C;color:#2E6F4C}
+.result-pill{display:inline-block;padding:2px 7px;border-radius:2px;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-left:3px;vertical-align:middle}
+.result-won{background:#E6F0E8;border:1px solid #2E6F4C;color:#2E6F4C}
+.result-lost{background:#F5E4E4;border:1px solid #B33931;color:#B33931}
+.result-pending{background:#EEF0F5;border:1px solid var(--steel-3);color:var(--steel)}
+.train-dot{position:absolute;left:calc(var(--dot-x) + 20px - 11px);width:22px;height:22px;background:var(--paper);border:3px solid var(--ink);border-radius:50%;z-index:6;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2);pointer-events:none;transition:top .2s linear}
+.train-dot::after{content:'';width:7px;height:7px;background:#8B1538;border-radius:50%;animation:jTrainPulse 1.4s ease-in-out infinite}
+@keyframes jTrainPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.5);opacity:.6}}
+.bet-panel{margin:14px 20px 20px;background:var(--paper);border:1px solid var(--rule);padding:16px}
+.bet-eyebrow{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.18em;color:var(--steel-2);text-transform:uppercase;margin-bottom:6px}
+.bet-title{font-family:var(--mono);font-size:15px;color:var(--ink);margin-bottom:3px;font-weight:600;letter-spacing:.04em}
+.bet-sub{font-family:var(--mono);font-size:11px;color:var(--steel);margin-bottom:14px}
+.bands{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
+.band-btn{background:var(--concrete);border:1px solid var(--rule);padding:12px 10px;cursor:pointer;text-align:left;transition:all .15s}
+.band-btn:hover{border-color:var(--ink)}
+.band-btn.selected{background:var(--ink);border-color:var(--ink)}
+.band-btn.selected .band-name,.band-btn.selected .band-odds{color:var(--paper)}
+.band-name{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--ink);text-transform:uppercase;display:block;margin-bottom:2px}
+.band-odds{font-family:var(--mono);font-size:17px;color:#8B1538;font-weight:600}
+.stake-row{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.stake-lbl{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--steel);margin-right:4px}
+.stake-chip{padding:7px 10px;background:var(--concrete);border:1px solid var(--rule);font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;color:var(--ink);transition:all .15s;flex:1}
+.stake-chip.active{background:#8B1538;color:var(--paper);border-color:#8B1538}
+.confirm-row{display:flex;gap:8px}
+.confirm-returns{flex:1;padding:10px 12px;background:var(--concrete);border:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--steel)}
+.confirm-returns strong{display:block;font-family:var(--mono);font-size:17px;color:var(--ink);margin-top:2px;font-weight:600}
+.btn-confirm{background:#8B1538;color:var(--paper);border:none;padding:0 18px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+.btn-confirm:hover{background:#641025}
+.btn-confirm:disabled{background:var(--steel-3);cursor:not-allowed}
+.btn-primary{background:var(--ink);color:var(--paper);border:none;padding:9px 16px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:background .15s}
+.btn-primary:hover{background:#8B1538}
+.btn-ghost{background:none;border:1px solid var(--rule);padding:5px 10px;font-family:var(--mono);font-size:9px;font-weight:600;color:var(--steel);cursor:pointer;letter-spacing:.12em;text-transform:uppercase}
+.btn-accent{background:#8B1538;color:var(--paper);border:none;padding:4px 12px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.04em;cursor:pointer;min-width:70px;text-align:center}
+.btn-accent:hover{background:#641025}
+.btn-accent.j-pulse{animation:jBtnPulse 1.4s ease-in-out infinite}
+@keyframes jBtnPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(139,21,56,0.6);transform:scale(1)}
+  50%{box-shadow:0 0 0 10px rgba(139,21,56,0);transform:scale(1.04)}
+}
+.j-start-hint{display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(139,21,56,0.06);border-bottom:1px solid rgba(139,21,56,0.15);font-family:var(--mono);font-size:11px;color:var(--ink);letter-spacing:.03em;opacity:.8}
+.j-start-hint-dot{width:6px;height:6px;border-radius:50%;background:#8B1538;flex-shrink:0;animation:jBtnPulse 1.8s ease-in-out infinite}
+.notice{margin:8px 20px 20px;padding:14px 16px;background:var(--concrete-2);border-left:3px solid var(--steel-2);font-family:var(--mono);font-size:11px;line-height:1.5;color:var(--steel)}
+.notice strong{color:var(--ink);font-weight:600;display:block;margin-bottom:2px}
+.bets-list{margin:8px 20px}
+.bet-item{padding:12px 0;border-bottom:1px dashed var(--rule);display:flex;justify-content:space-between;align-items:center}
+.bet-item:last-child{border-bottom:none}
+.bet-item-route{font-family:var(--mono);font-size:12px;color:var(--ink);font-weight:600;letter-spacing:.04em}
+.bet-item-sub{font-family:var(--mono);font-size:10px;color:var(--steel);margin-top:2px}
+.bet-item-result{font-family:var(--mono);font-size:11px;font-weight:600;text-align:right;text-transform:uppercase}
+.bet-item-result .amt{font-family:var(--mono);font-size:13px;display:block;font-weight:600}
+.r-pending{color:var(--steel)}.r-won{color:#2E6F4C}.r-lost{color:#B33931}
+.pnl-header{margin:14px 20px;background:var(--ink);padding:16px}
+.pnl-header-title{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--steel-3);margin-bottom:12px}
+.pnl-header-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pnl-h-lbl{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--steel-3);margin-bottom:3px}
+.pnl-h-val{font-family:var(--mono);font-size:18px;color:var(--paper);font-weight:600}
+.pnl-summary{margin:14px 0 4px;border-top:1px solid var(--rule);padding-top:14px}
+.pnl-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--steel);padding:4px 0}
+.pnl-row .pnl-val{font-weight:600;color:var(--ink)}
+.pnl-net{border-top:1px dashed var(--rule);margin-top:4px;padding-top:8px}
+.pnl-net span:first-child{font-weight:600;color:var(--ink)}
+.pnl-net .pnl-val{font-family:var(--display);font-size:18px}
+.audit-wrap{padding:16px 20px 30px}
+.audit-title{font-family:var(--mono);font-size:15px;color:var(--ink);margin-bottom:4px;font-weight:600;letter-spacing:.04em}
+.audit-sub{font-family:var(--mono);font-size:10px;color:var(--steel);margin-bottom:18px;line-height:1.5}
+.audit-section{margin-bottom:20px}
+.audit-section-hd{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--steel-2);border-bottom:1px solid var(--rule);padding-bottom:6px;margin-bottom:10px}
+.audit-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px}
+.audit-table th{text-align:left;color:var(--steel-2);font-weight:600;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:4px 6px 4px 0;border-bottom:1px solid var(--rule)}
+.audit-table td{padding:7px 6px 7px 0;border-bottom:1px dashed var(--rule);color:var(--ink);vertical-align:top;line-height:1.4}
+.audit-table tr:last-child td{border-bottom:none}
+.audit-win{color:#2E6F4C;font-weight:600}
+.audit-loss{color:#B33931;font-weight:600}
+.audit-pending{color:var(--steel)}
+.audit-note{font-family:var(--mono);font-size:10px;color:var(--steel);background:var(--concrete-2);border-left:3px solid var(--rule);padding:10px 12px;margin-top:12px;line-height:1.6}
+.rtt-panel{margin:0 20px 0;padding:11px 14px;background:var(--concrete-2);border:1px solid var(--rule);border-left:3px solid var(--ink)}
+.rtt-panel-hd{font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--steel-2);margin-bottom:8px;display:flex;justify-content:space-between}
+.rtt-panel-hd span{color:#2E6F4C;font-weight:600}
+.rtt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.rtt-cell{background:var(--paper);border:1px solid var(--rule);padding:6px 8px;text-align:center}
+.rtt-cell-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel-2);margin-bottom:3px}
+.rtt-cell-pct{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink)}
+.rtt-cell-odds{font-family:var(--mono);font-size:9px;color:#8B1538;margin-top:1px}
+.rtt-cell.best{border-color:#2E6F4C;background:#F0F7F2}
+.rtt-cell.best .rtt-cell-pct{color:#2E6F4C}
+.rtt-avg{font-family:var(--mono);font-size:10px;color:var(--steel);margin-top:8px;padding-top:8px;border-top:1px dashed var(--rule)}
+.rtt-avg b{color:var(--ink);font-weight:600}
+.rtt-source{font-family:var(--mono);font-size:8px;color:var(--steel-3);margin-top:4px}
+.sugg-card{margin:10px 20px 0;padding:13px 15px;background:var(--paper);border:1px solid var(--rule);border-left:3px solid #8B1538;transition:border-left-color .3s}
+.sugg-card.pre{border-left-color:#8B1538}
+.sugg-card.ontime{border-left-color:#2E6F4C}
+.sugg-card.late{border-left-color:#B33931}
+.sugg-eyebrow{font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;margin-bottom:6px}
+.sugg-eyebrow.red{color:#8B1538}
+.sugg-eyebrow.green{color:#2E6F4C}
+.sugg-eyebrow.late{color:#B33931}
+.sugg-title{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;letter-spacing:.02em}
+.sugg-body{font-family:var(--mono);font-size:11px;color:var(--steel);margin-bottom:11px;line-height:1.55}
+.sugg-body .amber{color:#C88A1E;font-weight:600}
+.sugg-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sugg-btn-ghost{background:none;color:var(--steel);border:1px solid var(--rule);padding:8px 12px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;cursor:pointer}
+.sugg-inner{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sugg-ckp{font-family:var(--mono);font-size:9px;color:var(--steel-2);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em}
+.sugg-band{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.04em}
+.sugg-odds{font-family:var(--display);font-size:22px;color:#8B1538;line-height:1;margin-top:2px}
+.sugg-reason{font-family:var(--mono);font-size:9px;color:var(--steel);margin-top:4px;line-height:1.5;max-width:180px}
+.sugg-tap{background:#8B1538;color:var(--paper);border:none;padding:10px 14px;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.sugg-tap:hover{background:#641025}
+.sugg-tap-stake{font-family:var(--mono);font-size:8px;color:var(--steel-2);text-align:right;margin-top:4px;letter-spacing:.04em}
+.sugg-tap-wrap{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0}
+/* Solari board */
+.sb-topbar{background:#160F08;padding:10px 20px;display:flex;align-items:center;border-bottom:1px solid #2A2820}
+.sb-badge{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#888}
+.sb-col-hds{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content max-content;column-gap:16px;padding:10px 20px 5px;background:#1A1208;border-bottom:1px solid #1A1915}
+.sb-col-hd{font-family:var(--mono);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#555;white-space:nowrap}
+.sb-board{background:#1A1208;padding:0 20px}
+.sb-row{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content max-content;column-gap:16px;padding:10px 0;border-bottom:1px solid #1A1915;align-items:center}
+.sb-featured{border-bottom:none;padding-bottom:0}
+.sb-flap-time{display:flex;gap:2px;align-items:center;flex-shrink:0}
+.sb-fc{width:20px;height:32px;background:#221A0E;border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;color:#F5A000;overflow:hidden;border-bottom:1px solid #160F08;flex-shrink:0}
+.sb-fc.col{background:transparent;width:8px;font-size:14px}
+.sb-fc.dim{color:#554E38;background:#1E1510}
+.sb-dest-cell{min-width:0;display:flex;flex-direction:column;gap:4px;overflow:hidden}
+.sb-dest-row{display:block;background:#221A0E;border-bottom:2px solid #160F08;padding:4px 8px;font-family:var(--mono);font-size:13px;color:#EFE8DB;letter-spacing:.14em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:2px}
+.sb-dest-row.dim{color:#554E38;background:#1E1510}
+.sb-dest-row.ar-row{color:#777;font-size:12px;letter-spacing:.1em}
+.sb-flap-plat{display:flex;gap:2px;justify-content:center;flex-shrink:0}
+.sb-pc{width:22px;height:30px;background:#221A0E;border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;color:#EFE8DB;overflow:hidden;border-bottom:1px solid #160F08;flex-shrink:0}
+.sb-pc.dim{color:#443E32;background:#1E1510}
+.sb-status-cell{font-family:var(--mono);font-size:10px;white-space:nowrap;min-width:60px}
+.sb-status-cell.ot{color:#5DBF8A;letter-spacing:.06em}
+.sb-status-cell.soon{color:#666;font-size:9px;letter-spacing:.14em;text-transform:uppercase}
+.sb-stat-section{padding:12px 20px 16px;border-bottom:1px solid #2A2820;background:#1A1208}
+.sb-stat-strip{display:flex;gap:0;border:1px solid #252420;background:#1E1510}
+.sb-stat-block{flex:1;padding:10px 10px;border-right:1px solid #1E1D18;min-width:0}
+.sb-stat-block:last-child{border-right:none}
+.sb-stat-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#555;margin-bottom:5px}
+.sb-stat-val{font-family:var(--mono);font-size:11px;color:#999;line-height:1.4}
+.sb-hi{color:#DDD}
+.sb-amber{color:#F5A000}
+.sb-betting-sub{font-family:var(--mono);font-size:9px;color:#555;letter-spacing:.04em;margin-top:5px}
+.sb-footer{padding:10px 20px 14px;background:#160F08;border-top:1px solid #1E1D18;font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#3A3830}
+.live-dot{display:inline-block;width:6px;height:6px;background:#B33931;border-radius:50%;margin-right:6px;animation:jLivePulse 2s ease-in-out infinite}
+@keyframes jLivePulse{0%,100%{opacity:1}50%{opacity:.3}}
+@media(min-width:500px){.sb-fc{width:26px;height:40px;font-size:20px}.sb-fc.col{width:10px;font-size:16px}.sb-pc{width:28px;height:38px;font-size:20px}.sb-dest-row{font-size:15px;padding:5px 10px}.sb-dest-cell{gap:5px}.sb-col-hds,.sb-row{column-gap:20px;padding-left:24px;padding-right:24px}.sb-board{padding:0 24px}.sb-stat-section{padding:14px 24px 18px}.sb-topbar,.sb-footer{padding-left:24px;padding-right:24px}}
+@media(max-width:499px){.sb-fc{width:16px;height:26px;font-size:13px}.sb-fc.col{width:6px;font-size:11px}.sb-pc{width:18px;height:26px;font-size:13px}.sb-dest-row{background:none;border:none;padding:0;font-size:12px;letter-spacing:.06em;color:#EFE8DB;border-radius:0}.sb-dest-row.dim{background:none;color:#554E38}.sb-dest-row.ar-row{font-size:11px}.sb-dest-cell{gap:3px}.sb-col-hds,.sb-row{column-gap:10px}.sb-stat-strip{flex-wrap:wrap}.sb-stat-block{flex:1 1 48%;border-bottom:1px solid #1E1D18}.sb-status-cell{min-width:40px;font-size:9px}}
+/* map modal */
+.map-modal{position:fixed;inset:0;background:rgba(20,20,20,.6);z-index:9999;display:none;justify-content:center;align-items:flex-end;backdrop-filter:blur(3px)}
+.map-modal.open{display:flex}
+.map-sheet{width:100%;max-width:640px;height:88vh;max-height:780px;background:var(--concrete);display:flex;flex-direction:column;animation:jSheetUp .28s ease-out}
+@keyframes jSheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.map-header{padding:14px 20px;background:var(--paper);border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center}
+.map-title-main{font-family:var(--mono);font-size:15px;color:var(--ink);font-weight:600;letter-spacing:.04em}
+.map-title-sub{font-family:var(--mono);font-size:10px;color:var(--steel);display:block;margin-top:1px}
+.map-close{background:var(--ink);color:var(--paper);border:none;padding:7px 14px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+#map-canvas{flex:1}
+.map-footer{padding:12px 20px;background:var(--ink);display:flex;justify-content:space-between;align-items:center}
+.map-footer-item .lbl{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--steel-3);display:block;margin-bottom:2px}
+.map-footer-item .val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--paper)}
+.map-footer-item .val.late{color:#FFA08C}
+.lf-station{width:12px!important;height:12px!important;background:var(--ink);border:2px solid var(--paper);border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.lf-station.passed{background:#2E6F4C}
+.lf-train{width:34px!important;height:34px!important;background:var(--paper);border:3px solid var(--ink);border-radius:50%;display:flex!important;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.j-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--paper);padding:12px 20px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.04em;opacity:0;transition:all .25s;z-index:10000;max-width:340px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.j-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.j-toast.win{background:#2E6F4C}.j-toast.loss{background:#B33931}
+/* departure board cabinet */
+.sb-cabinet{
+  margin:20px 16px 24px;
+  border:2px solid #2A2418;
+  border-radius:4px;
+  overflow:hidden;
+  box-shadow:
+    0 0 0 1px #3A3020,
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 8px 32px rgba(0,0,0,0.6);
+}
+.sb-cabinet-hdr{
+  background:#0E0C08;
+  border-bottom:2px solid #1A1510;
+  padding:10px 16px;
+  display:flex;align-items:center;gap:12px;
+  position:relative;
+}
+.sb-cabinet-title{
+  flex:1;display:flex;align-items:center;gap:10px;
+}
+.sb-cabinet-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#F5A000;
+  box-shadow:0 0 6px rgba(245,160,0,0.5);
+  flex-shrink:0;
+}
+.sb-cabinet-lbl{
+  font-family:'DM Mono',monospace;font-size:11px;font-weight:600;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:#F5A000;
+}
+.sb-cabinet-sub{
+  font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:#4A4438;
+}
+.sb-cabinet-live{
+  display:flex;align-items:center;gap:5px;
+  font-family:'DM Mono',monospace;font-size:9px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:#2E6F4C;
+}
+/* corner bolts */
+.sb-cabinet-bolt{
+  width:10px;height:10px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#3A3020,#1A1510);
+  border:1px solid #2A2418;
+  flex-shrink:0;
+}
+.sb-cabinet-body{
+  background:#1A1208;
+}
+.sb-cabinet-foot{
+  background:#0E0C08;
+  border-top:2px solid #1A1510;
+  padding:8px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:'DM Mono',monospace;font-size:8px;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:#2A2418;
+}
+/* remove old sb-footer since cabinet-foot replaces it */
+.sb-footer{display:none}
+@media(max-width:720px){
+  .mc-tagline{font-size:9.5px}
+  .mc-icon{width:30px;height:30px}
+}
+.j-dir-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px}
+.j-dir-btn{background:var(--concrete);border:1px solid var(--rule);padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px}
+.j-dir-btn:hover{border-color:var(--ink)}
+.j-dir-lbl{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.j-dir-odds{font-family:var(--mono);font-size:18px;font-weight:600;color:#8B1538}
+.j-dir-worse:hover{background:#FDF0F0;border-color:#B33931}
+.j-dir-worse:hover .j-dir-lbl{color:#B33931}
+.j-dir-recover:hover{background:#F0F7F2;border-color:#2E6F4C}
+.j-dir-recover:hover .j-dir-lbl{color:#2E6F4C}
+.j-dir-recover:hover .j-dir-odds{color:#2E6F4C}
+</style>
+</head>
+<body>
+
+<!-- ════════ SPLASH ════════ -->
+<div id="screen-splash" class="screen">
+
+  <!-- track bed -->
+  <div class="splash-track-wrap">
+    <div class="splash-rail splash-rail-top"></div>
+    <div class="splash-rail splash-rail-bot"></div>
+    <div class="splash-sleepers" id="splashSleepers"></div>
+  </div>
+
+  <!-- train -->
+  <div class="splash-train">
+    <div class="splash-motion">
+      <div class="sm-line"></div>
+      <div class="sm-line"></div>
+      <div class="sm-line"></div>
+    </div>
+    <!-- Intercity-style train silhouette as inline SVG -->
+    <svg width="320" height="44" viewBox="0 0 320 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- carriage 3 (rear) -->
+      <rect x="0" y="12" width="74" height="24" rx="2" fill="#3A2E1E" stroke="rgba(196,146,42,0.5)" stroke-width="1"/>
+      <rect x="6" y="17" width="14" height="10" rx="1" fill="rgba(196,146,42,0.25)" stroke="rgba(196,146,42,0.4)" stroke-width=".5"/>
+      <rect x="24" y="17" width="14" height="10" rx="1" fill="rgba(196,146,42,0.25)" stroke="rgba(196,146,42,0.4)" stroke-width=".5"/>
+      <rect x="42" y="17" width="14" height="10" rx="1" fill="rgba(196,146,42,0.25)" stroke="rgba(196,146,42,0.4)" stroke-width=".5"/>
+      <circle cx="16" cy="38" r="4" fill="#2A1E0E" stroke="rgba(196,146,42,0.6)" stroke-width="1.5"/>
+      <circle cx="58" cy="38" r="4" fill="#2A1E0E" stroke="rgba(196,146,42,0.6)" stroke-width="1.5"/>
+      <!-- coupling -->
+      <rect x="74" y="23" width="4" height="3" fill="rgba(196,146,42,0.5)"/>
+      <!-- carriage 2 (middle) -->
+      <rect x="78" y="12" width="74" height="24" rx="2" fill="#3A2E1E" stroke="rgba(196,146,42,0.5)" stroke-width="1"/>
+      <rect x="84" y="17" width="14" height="10" rx="1" fill="rgba(196,146,42,0.28)" stroke="rgba(196,146,42,0.45)" stroke-width=".5"/>
+      <rect x="102" y="17" width="14" height="10" rx="1" fill="rgba(196,146,42,0.28)" stroke="rgba(196,146,42,0.45)" stroke-width=".5"/>
+      <rect x="120" y="17" width="14" height="10" rx="1" fill="rgba(196,146,42,0.28)" stroke="rgba(196,146,42,0.45)" stroke-width=".5"/>
+      <circle cx="94" cy="38" r="4" fill="#2A1E0E" stroke="rgba(196,146,42,0.6)" stroke-width="1.5"/>
+      <circle cx="136" cy="38" r="4" fill="#2A1E0E" stroke="rgba(196,146,42,0.6)" stroke-width="1.5"/>
+      <!-- coupling -->
+      <rect x="152" y="23" width="4" height="3" fill="rgba(196,146,42,0.5)"/>
+      <!-- locomotive (front) -->
+      <path d="M156 12 L296 12 L314 20 L314 36 L156 36 Z" fill="#3A2510" stroke="rgba(196,146,42,0.65)" stroke-width="1"/>
+      <!-- cab window -->
+      <rect x="276" y="15" width="28" height="14" rx="1" fill="rgba(196,146,42,0.22)" stroke="rgba(196,146,42,0.55)" stroke-width=".8"/>
+      <!-- loco windows -->
+      <rect x="164" y="17" width="16" height="10" rx="1" fill="rgba(196,146,42,0.3)" stroke="rgba(196,146,42,0.5)" stroke-width=".5"/>
+      <rect x="184" y="17" width="16" height="10" rx="1" fill="rgba(196,146,42,0.3)" stroke="rgba(196,146,42,0.5)" stroke-width=".5"/>
+      <rect x="204" y="17" width="16" height="10" rx="1" fill="rgba(196,146,42,0.3)" stroke="rgba(196,146,42,0.5)" stroke-width=".5"/>
+      <rect x="224" y="17" width="16" height="10" rx="1" fill="rgba(196,146,42,0.3)" stroke="rgba(196,146,42,0.5)" stroke-width=".5"/>
+      <!-- headlight -->
+      <circle cx="312" cy="26" r="3" fill="#D4A240" opacity="1"/>
+      <circle cx="312" cy="26" r="6" fill="rgba(196,146,42,0.3)"/>
+      <!-- loco wheels -->
+      <circle cx="172" cy="38" r="4" fill="#2A1E0E" stroke="rgba(196,146,42,0.65)" stroke-width="1.5"/>
+      <circle cx="210" cy="38" r="4" fill="#2A1E0E" stroke="rgba(196,146,42,0.65)" stroke-width="1.5"/>
+      <circle cx="250" cy="38" r="5" fill="#2A1E0E" stroke="rgba(196,146,42,0.75)" stroke-width="1.5"/>
+      <circle cx="290" cy="38" r="5" fill="#2A1E0E" stroke="rgba(196,146,42,0.75)" stroke-width="1.5"/>
+      <!-- stripe accent -->
+      <line x1="156" y1="26" x2="312" y2="26" stroke="rgba(139,21,56,0.7)" stroke-width="1.5"/>
+    </svg>
+  </div>
+
+  <div class="splash-inner">
+    <div class="splash-eyebrow">Live Rail Track Data</div>
+    <div class="splash-logo">The <em>Platform</em></div>
+    <div class="splash-rule"></div>
+    <div class="splash-tagline">
+      <strong>Real trains. Real data. Real bets.</strong><br>
+      Every market settles on actual arrival.
+    </div>
+    <div class="splash-progress">
+      <div class="splash-progress-fill" id="splashFill"></div>
+    </div>
+    <button class="splash-skip" onclick="goLobby()">Skip →</button>
+  </div>
+</div>
+
+<!-- ════════ LOBBY ════════ -->
+<div id="screen-lobby" class="screen">
+
+  <div class="lobby-header">
+    <div class="lobby-brand">The <em>Platform</em></div>
+  </div>
+
+  <div class="lobby-intro">
+    <div class="lobby-eyebrow">Live Rail Betting</div>
+    <div class="lobby-title">Bet on <em>real trains</em><br>in motion.</div>
+    <div class="lobby-desc">Markets powered by live UK rail data.</div>
+  </div>
+
+  <div class="modes-grid">
+
+    <!-- THE JOURNEY -->
+    <div class="mode-card mc-journey mc-live" onclick="goJourney()">
+      <div class="mc-body">
+        <div class="mc-mode-label">Mode 01</div>
+        <div class="mc-title-row">
+          <svg class="mc-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- vertical route line -->
+            <line x1="10" y1="6" x2="10" y2="30" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+            <line x1="10" y1="6" x2="10" y2="16" stroke="#2E6F4C" stroke-width="2"/>
+            <!-- origin dot -->
+            <circle cx="10" cy="6" r="3" fill="#8B1538"/>
+            <!-- passed dot -->
+            <circle cx="10" cy="14" r="2.5" fill="#2E6F4C"/>
+            <!-- active/next dot pulsing -->
+            <circle cx="10" cy="22" r="3" fill="#8B1538"/>
+            <circle cx="10" cy="22" r="5.5" stroke="#8B1538" stroke-width="1" opacity="0.3"/>
+            <!-- future dot -->
+            <circle cx="10" cy="30" r="2.5" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+            <!-- tick marks right -->
+            <line x1="14" y1="6" x2="20" y2="6" stroke="#8B1538" stroke-width="1"/>
+            <line x1="14" y1="14" x2="20" y2="14" stroke="#2E6F4C" stroke-width="1.5"/>
+            <line x1="14" y1="22" x2="20" y2="22" stroke="#8B1538" stroke-width="1.5"/>
+            <line x1="14" y1="30" x2="20" y2="30" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+          </svg>
+          <div class="mc-title">The Journey</div>
+        </div>
+        <div class="mc-tagline">"Follow a live rail service. Bet on the route."</div>
+      </div>
+      <div class="mc-foot">
+        <div class="mc-tags">
+          <span class="mc-tag">Long-haul</span>
+          <span class="mc-tag">Multi-checkpoint</span>
+        </div>
+        <button class="mc-cta">Play →</button>
+      </div>
+    </div>
+
+    <!-- THE NETWORK -->
+    <div class="mode-card mc-acca mc-live" onclick="goAcca()">
+      <div class="mc-body">
+        <div class="mc-mode-label">Mode 02</div>
+        <div class="mc-title-row">
+          <svg class="mc-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- 3x2 odds tile grid -->
+            <!-- row 1 -->
+            <rect x="2" y="4" width="10" height="12" rx="1" fill="rgba(196,146,42,0.12)" stroke="rgba(196,146,42,0.3)" stroke-width="1"/>
+            <rect x="13" y="4" width="10" height="12" rx="1" fill="rgba(0,184,108,0.15)" stroke="rgba(0,184,108,0.5)" stroke-width="1.5"/>
+            <rect x="24" y="4" width="10" height="12" rx="1" fill="rgba(196,146,42,0.12)" stroke="rgba(196,146,42,0.3)" stroke-width="1"/>
+            <!-- row 2 -->
+            <rect x="2" y="18" width="10" height="12" rx="1" fill="rgba(196,146,42,0.12)" stroke="rgba(196,146,42,0.3)" stroke-width="1"/>
+            <rect x="13" y="18" width="10" height="12" rx="1" fill="rgba(196,146,42,0.12)" stroke="rgba(196,146,42,0.3)" stroke-width="1"/>
+            <rect x="24" y="18" width="10" height="12" rx="1" fill="rgba(0,184,108,0.15)" stroke="rgba(0,184,108,0.5)" stroke-width="1.5"/>
+            <!-- odds text in selected tiles -->
+            <text x="18" y="13" text-anchor="middle" font-family="monospace" font-size="5.5" font-weight="700" fill="#4dff9a">2.10</text>
+            <text x="29" y="27" text-anchor="middle" font-family="monospace" font-size="5.5" font-weight="700" fill="#4dff9a">3.40</text>
+          </svg>
+          <div class="mc-title">The Network</div>
+        </div>
+        <div class="mc-tagline">"Pick various train legs for an Acca like no other."</div>
+      </div>
+      <div class="mc-foot">
+        <div class="mc-tags">
+          <span class="mc-tag">3–5 legs</span>
+          <span class="mc-tag">Multi-operator</span>
+          <span class="mc-tag">Live pool</span>
+        </div>
+        <button class="mc-cta">Play →</button>
+      </div>
+    </div>
+
+    <!-- THE STATION -->
+    <div class="mode-card mc-station mc-live" onclick="window.location.href='board_demo.html'" style="cursor:pointer">
+      <div class="mc-body">
+        <div class="mc-mode-label">Mode 03</div>
+        <div class="mc-title-row">
+          <svg class="mc-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- departures board tiles — 3 rows -->
+            <!-- row 1: time tiles -->
+            <rect x="2" y="3" width="8" height="10" rx="1" fill="#2E2418"/>
+            <rect x="11" y="3" width="8" height="10" rx="1" fill="#2E2418"/>
+            <rect x="20" y="3" width="14" height="10" rx="1" fill="#2E2418"/>
+            <text x="6" y="11" text-anchor="middle" font-family="monospace" font-size="6" font-weight="600" fill="#F5A000">14</text>
+            <text x="15" y="11" text-anchor="middle" font-family="monospace" font-size="6" font-weight="600" fill="#F5A000">23</text>
+            <text x="27" y="11" text-anchor="middle" font-family="monospace" font-size="5.5" font-weight="600" fill="#EFE8DB" letter-spacing="1">MKC</text>
+            <!-- row 2: dimmer -->
+            <rect x="2" y="15" width="8" height="10" rx="1" fill="#221A10"/>
+            <rect x="11" y="15" width="8" height="10" rx="1" fill="#221A10"/>
+            <rect x="20" y="15" width="14" height="10" rx="1" fill="#221A10"/>
+            <text x="6" y="23" text-anchor="middle" font-family="monospace" font-size="6" font-weight="600" fill="#554E38">15</text>
+            <text x="15" y="23" text-anchor="middle" font-family="monospace" font-size="6" font-weight="600" fill="#554E38">07</text>
+            <text x="27" y="23" text-anchor="middle" font-family="monospace" font-size="5.5" font-weight="600" fill="#554E38" letter-spacing="1">MKC</text>
+            <!-- row 3: dimmest -->
+            <rect x="2" y="27" width="8" height="7" rx="1" fill="#1C1610"/>
+            <rect x="11" y="27" width="8" height="7" rx="1" fill="#1C1610"/>
+            <rect x="20" y="27" width="14" height="7" rx="1" fill="#1C1610"/>
+            <text x="6" y="33" text-anchor="middle" font-family="monospace" font-size="5.5" font-weight="600" fill="#554E38">15</text>
+            <text x="15" y="33" text-anchor="middle" font-family="monospace" font-size="5.5" font-weight="600" fill="#554E38">42</text>
+            <text x="27" y="33" text-anchor="middle" font-family="monospace" font-size="5" font-weight="600" fill="#554E38" letter-spacing="1">MKC</text>
+            <!-- flip line -->
+            <line x1="2" y1="8" x2="10" y2="8" stroke="#160F08" stroke-width="0.8"/>
+            <line x1="11" y1="8" x2="19" y2="8" stroke="#160F08" stroke-width="0.8"/>
+          </svg>
+          <div class="mc-title">The Station</div>
+        </div>
+        <div class="mc-tagline">"One station. Every arrival. Non-stop action."</div>
+      </div>
+      <div class="mc-foot">
+        <div class="mc-tags">
+          <span class="mc-tag">MKC Hub</span>
+          <span class="mc-tag">Sequential</span>
+          <span class="mc-tag">WCML</span>
+        </div>
+        <button class="mc-cta">Play →</button>
+      </div>
+    </div>
+
+    <!-- THE DRIVER CARD -->
+    <div class="mode-card mc-driver mc-live" onclick="goDriver()" style="cursor:pointer">
+      <div class="mc-ribbon mc-ribbon-live">LIVE</div>
+      <div class="mc-body">
+        <div class="mc-mode-label">Multiplier · Cash Out</div>
+        <div class="mc-title-row">
+          <svg class="mc-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Cab windscreen -->
+            <rect x="2" y="12" width="32" height="14" rx="2" fill="#2A1E10" stroke="#C4922A" stroke-width="1"/>
+            <!-- Body -->
+            <rect x="2" y="14" width="26" height="10" rx="1" fill="#3A2E1E"/>
+            <!-- Nose -->
+            <path d="M28 14 Q34 18 34 21 L28 24 Z" fill="#1E1510" stroke="#C4922A" stroke-width=".5"/>
+            <!-- Windscreen -->
+            <path d="M29 15 Q33 18 33 21 L29 23 Z" fill="rgba(100,160,220,0.35)"/>
+            <!-- Gold swoosh stripe -->
+            <path d="M2 20 L27 17.5 L27 19 L2 21.5 Z" fill="#C4922A" opacity=".7"/>
+            <!-- Headlight glow -->
+            <circle cx="33" cy="20" r="2.5" fill="rgba(255,240,180,0.9)"/>
+            <circle cx="33" cy="20" r="4.5" fill="rgba(255,200,80,0.18)"/>
+            <!-- Wheels -->
+            <circle cx="9" cy="26" r="3" fill="#1E1510" stroke="#C4922A" stroke-width="1"/>
+            <circle cx="19" cy="26" r="3" fill="#1E1510" stroke="#C4922A" stroke-width="1"/>
+            <circle cx="29" cy="26" r="3" fill="#1E1510" stroke="#C4922A" stroke-width="1"/>
+            <!-- Rail -->
+            <line x1="0" y1="29" x2="36" y2="29" stroke="#C4922A" stroke-width="1" opacity=".35"/>
+            <!-- Multiplier text hint -->
+            <text x="5" y="22" font-family="monospace" font-size="5" fill="#C4922A" opacity=".8">1.00×</text>
+          </svg>
+          <div class="mc-title">The Driver</div>
+        </div>
+        <div class="mc-tagline">"You're in the cab. You decide when to stop."</div>
+      </div>
+      <div class="mc-foot">
+        <div class="mc-tags">
+          <span class="mc-tag">MKC</span>
+          <span class="mc-tag">Multiplier</span>
+          <span class="mc-tag">Cash Out</span>
+          <span class="mc-tag">Darwin</span>
+        </div>
+        <button class="mc-cta">Play →</button>
+      </div>
+    </div>
+
+    <!-- INFO CARD -->
+    <div class="mode-card" onclick="window.location.href='explainer.html'" style="cursor:pointer;border:1px solid var(--rule);border-left:3px solid var(--steel-2);background:var(--concrete-2);display:flex;align-items:center;gap:20px;padding:20px 24px;margin-top:4px">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <span style="font-family:var(--display);font-size:1.1rem;color:var(--paper);font-style:italic">i</span>
+      </div>
+      <div style="flex:1">
+        <div style="font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--steel);margin-bottom:3px">Product Overview</div>
+        <div style="font-family:var(--display);font-size:1rem;color:var(--ink)">How The Platform works</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--steel-2);margin-top:2px">Data sources · Round structure · Markets · Commercial</div>
+      </div>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--steel-2)">→</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════ JOURNEY SCREEN ════════ -->
+<div id="screen-journey" class="screen">
+  <div class="j-app">
+    <div class="j-header">
+      <div style="display:flex;align-items:center">
+        <button class="j-back" onclick="goLobby()">← Lobby</button>
+        <div class="brand">The <em>Platform</em></div>
+      </div>
+      <div class="balance"><span class="balance-lbl">BAL</span>£<span id="j-balance">100.00</span></div>
+    </div>
+
+    <!-- Journey inner lobby — Solari board in cabinet -->
+    <div id="j-lobby" class="j-screen j-active">
+      <div class="sb-cabinet">
+        <!-- cabinet header -->
+        <div class="sb-cabinet-hdr">
+          <div class="sb-cabinet-title">
+            <span class="sb-cabinet-dot"></span>
+            <span class="sb-cabinet-lbl">Departures</span>
+          </div>
+          <div class="sb-cabinet-live">
+            <span class="live-dot"></span>
+            <span>Live</span>
+          </div>
+        </div>
+        <!-- board content -->
+        <div class="sb-cabinet-body">
+          <div class="sb-topbar" style="background:transparent;padding:0 0 0 0;border:none">
+          </div>
+          <div class="sb-col-hds">
+            <div class="sb-col-hd">Departs</div>
+            <div class="sb-col-hd">Destination</div>
+            <div class="sb-col-hd">Plat</div>
+            <div class="sb-col-hd">Status</div>
+          </div>
+          <div class="sb-board">
+            <div class="sb-row sb-featured">
+              <div class="sb-flap-time" id="sb-time"></div>
+              <div class="sb-dest-cell" id="sb-dest"></div>
+              <div class="sb-flap-plat" id="sb-plat"></div>
+              <div class="sb-status-cell ot" id="sb-status"></div>
+            </div>
+          </div>
+          <div class="sb-stat-section">
+            <div class="sb-stat-strip">
+              <div class="sb-stat-block">
+                <div class="sb-stat-lbl">Checkpoints</div>
+                <div class="sb-stat-val"><span class="sb-hi">6 stops</span> · Carlisle to Euston</div>
+              </div>
+              <div class="sb-stat-block">
+                <div class="sb-stat-lbl">Markets</div>
+                <div class="sb-stat-val"><span class="sb-hi">4 bands</span> per checkpoint</div>
+              </div>
+              <div class="sb-stat-block">
+                <div class="sb-stat-lbl">Max return</div>
+                <div class="sb-stat-val"><span class="sb-amber">191×</span> if all 6 hit</div>
+              </div>
+              <div class="sb-stat-block">
+                <div class="sb-stat-lbl">Betting</div>
+                <div id="sb-open-btn" onclick="jEnterService()" style="display:inline-flex;align-items:center;gap:10px;background-color:#8B1538;padding:10px 18px;cursor:pointer;margin-bottom:5px">
+                  <span style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#EFE8DB;letter-spacing:.16em;text-transform:uppercase;line-height:1">OPEN</span>
+                  <span style="font-family:'DM Mono',monospace;font-size:14px;color:#EFE8DB;opacity:.8;letter-spacing:0">→</span>
+                </div>
+                <div class="sb-betting-sub">closes at Carlisle</div>
+              </div>
+            </div>
+          </div>
+          <div class="sb-board">
+            <div class="sb-row">
+              <div class="sb-flap-time" id="sb-time-2"></div>
+              <div class="sb-dest-cell dim" id="sb-dest-2"></div>
+              <div class="sb-flap-plat" id="sb-plat-2"></div>
+              <div class="sb-status-cell soon">Soon</div>
+            </div>
+            <div class="sb-row">
+              <div class="sb-flap-time" id="sb-time-3"></div>
+              <div class="sb-dest-cell dim" id="sb-dest-3"></div>
+              <div class="sb-flap-plat" id="sb-plat-3"></div>
+              <div class="sb-status-cell soon">Soon</div>
+            </div>
+          </div>
+        </div>
+        <!-- cabinet footer -->
+        <div class="sb-cabinet-foot">
+          <span>Network Rail TRUST · Darwin Live Feed · Selected departures only</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Journey service screen -->
+    <div id="j-service" class="j-screen">
+      <div class="back-bar">
+        <button class="back-btn" onclick="goLobby()">Lobby</button>
+        <button class="btn-ghost" onclick="jResetJourney()">Reset</button>
+      </div>
+      <div class="sim-bar">
+        <button class="btn-accent" id="sim-pause">▶ Start</button>
+        <div>NOW <span class="sim-now-val" id="sim-now">08:52</span></div>
+        <div class="speed-btns">
+          <button class="speed-btn active" data-spd="300">300×</button>
+          <button class="speed-btn" data-spd="500">500×</button>
+        </div>
+      </div>
+      <div class="j-start-hint" id="jStartHint" style="display:none">
+        <span class="j-start-hint-dot"></span>
+        Place your bets below, then press Start to simulate the journey
+      </div>
+      <div class="pnl-bar" id="pnl-bar" style="display:none">
+        <span class="pnl-bar-item">Staked <b id="pnl-staked">£0</b></span>
+        <span class="pnl-bar-sep">·</span>
+        <span class="pnl-bar-item">Returned <b id="pnl-returned">£0</b></span>
+        <span class="pnl-bar-sep">·</span>
+        <span class="pnl-bar-item">Net <b id="pnl-net" class="pnl-pos">+£0</b></span>
+      </div>
+      <div class="service-hero">
+        <div class="sh-op">Avanti West Coast · 1M12 · Pendolino 11-car</div>
+        <div class="sh-route" id="sh-route"></div>
+        <div class="sh-row">
+          <span><span class="sh-lbl">Dep</span><b id="sh-dep" style="font-family:var(--mono)"></b></span>
+          <span><span class="sh-lbl">Arr</span><b id="sh-arr" style="font-family:var(--mono)"></b></span>
+          <span id="sh-delay" class="on-time" style="font-family:var(--mono);font-size:11px;font-weight:600">On time</span>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-tab="singles">Singles</button>
+        <button class="tab" data-tab="mybets">My Bets</button>
+        <button class="tab" data-tab="audit">Audit</button>
+      </div>
+      <div id="tab-singles">
+        <div class="map-trigger" id="map-trigger-btn">
+          <div class="map-trigger-icon"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2V6z"/><path d="M9 4v14M15 6v14"/></svg></div>
+          <div><div class="map-trigger-title">View on map</div><div class="map-trigger-sub">Live train position between stations</div></div>
+          <span class="map-trigger-arrow">→</span>
+        </div>
+        <div id="sugg-card"></div>
+        <div class="route-strip-wrap" id="route-strip-wrap">
+          <div class="route-line-track" id="line-track"></div>
+          <div class="route-line-filled" id="line-filled"></div>
+          <div class="route-line-active" id="line-active"></div>
+          <div class="train-dot" id="train-dot" style="display:none"></div>
+          <div id="ckp-rows"></div>
+        </div>
+        <div id="bet-container"></div>
+      </div>
+      <div id="tab-mybets" style="display:none"><div class="bets-list" id="bets-list"></div></div>
+      <div id="tab-audit" style="display:none"><div id="audit-container"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Map modal -->
+<div class="map-modal" id="map-modal">
+  <div class="map-sheet">
+    <div class="map-header">
+      <div><div class="map-title-main">Live position</div><span class="map-title-sub">Edinburgh → London Euston · 1M12</span></div>
+      <button class="map-close" onclick="closeMap()">Close</button>
+    </div>
+    <div id="map-canvas"></div>
+    <div class="map-footer">
+      <div class="map-footer-item"><span class="lbl">Approaching</span><span class="val" id="map-next">—</span></div>
+      <div class="map-footer-item" style="text-align:right"><span class="lbl">Running</span><span class="val" id="map-delay">—</span></div>
+    </div>
+  </div>
+</div>
+<div class="j-toast" id="j-toast"></div>
+<div id="screen-acca" class="screen">
+
+  <div class="acca-app-header">
+    <div class="acca-hdr-left">
+      <button class="acca-back" onclick="goLobby()">← Lobby</button>
+      <span class="acca-hdr-brand">The <em>Platform</em></span>
+      <span class="acca-hdr-mode">The Network</span>
+    </div>
+    <div class="acca-hdr-right">
+      <div class="acca-hdr-bal">BAL <strong id="accaBal">£100.00</strong></div>
+    </div>
+  </div>
+
+  <div class="acca-body">
+    <div class="acca-markets-col">
+      <div class="acca-markets-hdr">
+        <span class="amh-title">Eligible trains · tap odds to add</span>
+        <span class="amh-count" id="accaPoolCount">8 markets</span>
+      </div>
+      <div class="acca-markets-list" id="accaGrid"></div>
+    </div>
+
+    <!-- desktop slip -->
+    <div class="acca-slip-col">
+      <div class="aslip-hdr">
+        <div class="aslip-hdr-top">
+          <span class="aslip-title">Bet Slip</span>
+          <div class="amob-leg-tracker" id="aDesktopLegTracker" style="flex:1;justify-content:flex-start;margin-left:10px"></div>
+        </div>
+        <div class="aslip-sub" id="aSlipSub">Add 3–5 legs to place an acca</div>
+      </div>
+      <div class="asettle-bar"><div class="asettle-fill" id="aFillD"></div></div>
+      <div class="arb" id="aRbD">
+        <div class="arb-icon" id="aRbIconD"></div>
+        <div class="arb-lbl" id="aRbLblD"></div>
+        <div class="arb-val" id="aRbValD"></div>
+        <div class="arb-det" id="aRbDetD"></div>
+        <button class="anew-btn" onclick="accaReset()">New Acca</button>
+      </div>
+      <div class="aslip-legs" id="aLegsD">
+        <div class="aslip-empty">
+          <div class="aslip-empty-icon">🚂</div>
+          <div class="aslip-empty-title">Empty slip</div>
+          <div class="aslip-empty-sub">Tap any odds button on the left to add a leg instantly</div>
+        </div>
+      </div>
+      <div class="aslip-foot" id="aFootD">
+        <div class="asf-odds-row">
+          <span class="asf-lbl">Combined odds</span>
+          <span class="asf-combined dim" id="aOddsD">—</span>
+        </div>
+        <div class="asf-stake-row">
+          <input class="asf-input" id="aStakeD" type="number" placeholder="Enter stake £" min="0.5" max="500" step="0.5">
+        </div>
+        <div class="asf-qs">
+          <button class="asf-q" onclick="aQs(2)">£2</button>
+          <button class="asf-q" onclick="aQs(5)">£5</button>
+          <button class="asf-q" onclick="aQs(10)">£10</button>
+          <button class="asf-q" onclick="aQs(25)">£25</button>
+        </div>
+        <div class="asf-ret-row">
+          <span class="asf-ret-lbl">Potential return</span>
+          <span class="asf-ret-val" id="aRetD">—</span>
+        </div>
+        <button class="aplace-btn" id="aPbD" disabled onclick="accaPlace()">Place Acca</button>
+      </div>
+      <div class="ahist-bar" id="aHistD"><span class="ahist-lbl">Recent:</span></div>
+    </div>
+  </div>
+
+  <!-- mobile slip -->
+  <!-- mobile persistent bar -->
+  <div class="amob-bar" id="aMobBar">
+    <div class="amob-bar-left">
+      <span class="amob-bar-title">Bet Slip</span>
+      <span class="amob-bar-pill lp-dim" id="aMobLegPill">0 legs</span>
+      <span class="amob-bar-sub" id="aMobSub">Pick 3 to bet</span>
+    </div>
+    <button class="amob-view-btn vb-dim" id="aMobViewBtn" onclick="openMobSlip()">View →</button>
+  </div>
+
+  <!-- mobile full-screen slip overlay -->
+  <div class="amob-slip" id="aMobSlip">
+    <div class="amob-slip-hdr">
+      <span class="amob-slip-hdr-title">Bet Slip</span>
+      <div class="amob-leg-tracker" id="aMobLegTracker">
+        <!-- circles rendered by JS -->
+      </div>
+      <button class="amob-slip-close" onclick="closeMobSlip()">← Back</button>
+    </div>
+    <div class="amob-legs-wrap" id="aLegsM"></div>
+    <div class="asettle-bar"><div class="asettle-fill" id="aFillM"></div></div>
+    <div class="arb" id="aRbM">
+      <div class="arb-icon" id="aRbIconM"></div>
+      <div class="arb-lbl" id="aRbLblM"></div>
+      <div class="arb-val" id="aRbValM"></div>
+      <div class="arb-det" id="aRbDetM"></div>
+      <button class="anew-btn" onclick="accaReset()">New Acca</button>
+    </div>
+    <div class="aslip-foot" id="aFootM">
+      <div class="asf-odds-row">
+        <span class="asf-lbl">Combined odds</span>
+        <span class="asf-combined dim" id="aOddsM">—</span>
+      </div>
+      <div class="asf-stake-row">
+        <input class="asf-input" id="aStakeM" type="number" placeholder="Enter stake £" min="0.5" max="500" step="0.5">
+      </div>
+      <div class="asf-qs">
+        <button class="asf-q" onclick="aQsM(2)">£2</button>
+        <button class="asf-q" onclick="aQsM(5)">£5</button>
+        <button class="asf-q" onclick="aQsM(10)">£10</button>
+        <button class="asf-q" onclick="aQsM(25)">£25</button>
+      </div>
+      <div class="asf-ret-row">
+        <span class="asf-ret-lbl">Potential return</span>
+        <span class="asf-ret-val" id="aRetM">—</span>
+      </div>
+      <button class="aplace-btn" id="aPbM" disabled onclick="accaPlace()">Place Acca</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ── SCREEN ROUTING ── */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>{
+    s.classList.remove('active');
+    s.style.display='none';
+  });
+  const el=document.getElementById(id);
+  el.style.display='';
+  el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ── SPLASH ── */
+let splashInterval;
+function startSplash(){
+  const splash=document.getElementById('screen-splash');
+  if(splash){splash.style.display='flex';splash.classList.add('active');}
+  document.body.style.overflow='hidden';
+  let pct=0;
+  const fill=document.getElementById('splashFill');
+  splashInterval=setInterval(()=>{
+    pct+=100/50;
+    fill.style.width=Math.min(pct,100)+'%';
+    if(pct>=100){clearInterval(splashInterval);goLobby();}
+  },100);
+}
+function goLobby(){
+  clearInterval(splashInterval);
+  const splash=document.getElementById('screen-splash');
+  if(splash){splash.style.display='none';splash.classList.remove('active');}
+  document.body.style.overflow='';
+  show('screen-lobby');
+}
+function goDriver(){
+  // Navigate to The Driver game — passes ?lobby so back button returns here
+  window.location.href='the-driver.html?lobby';
+}
+function goAcca(){
+  show('screen-acca');
+  if(!accaPool.length){accaPool=accaGenPool();accaRenderPool();accaRenderSlip();accaRenderHist();}
+}
+function goJourney(){
+  show('screen-journey');
+  jInitIfNeeded();
+}
+
+// Generate splash sleepers to fill full viewport width
+(function(){
+  var sl=document.getElementById('splashSleepers');
+  if(!sl)return;
+  var count=Math.ceil(window.innerWidth/20)+4;
+  for(var i=0;i<count;i++){var d=document.createElement('div');d.className='splash-sleeper';sl.appendChild(d);}
+})();
+
+if(window.location.hash==='#lobby'||window.location.search==='?lobby'){
+  // Immediately hide splash, no animation needed
+  const sp=document.getElementById('screen-splash');
+  if(sp){sp.style.display='none';sp.classList.remove('active');}
+  document.body.style.overflow='';
+  show('screen-lobby');
+}else{
+  document.body.style.overflow='hidden';
+  startSplash();
+}
+
+/* ════════════════════════════════════════
+   ACCA LOGIC
+════════════════════════════════════════ */
+const AOPS=[
+  {name:'Avanti West Coast',code:'AW',col:'#a060e0',bg:'rgba(160,96,224,0.18)'},
+  {name:'LNER',code:'LN',col:'#e83050',bg:'rgba(232,48,80,0.16)'},
+  {name:'Thameslink',code:'TL',col:'#d060b8',bg:'rgba(208,96,184,0.16)'},
+  {name:'GWR',code:'GW',col:'#18a868',bg:'rgba(24,168,104,0.18)'},
+  {name:'CrossCountry',code:'XC',col:'#b030a0',bg:'rgba(176,48,160,0.16)'},
+  {name:'Southern',code:'SN',col:'#10b050',bg:'rgba(16,176,80,0.16)'},
+  {name:'Northern',code:'NT',col:'#3870c8',bg:'rgba(56,112,200,0.18)'},
+  {name:'ScotRail',code:'SR',col:'#3090c8',bg:'rgba(48,144,200,0.18)'},
+  {name:'c2c',code:'CC',col:'#e07030',bg:'rgba(224,112,48,0.16)'},
+  {name:'TransPennine',code:'TP',col:'#1860c0',bg:'rgba(24,96,192,0.18)'}
+];
+const AROUTES=[
+  {from:'London Euston',to:'Milton Keynes Central',op:0,etaR:[2,5],baseD:0},
+  {from:'Edinburgh Waverley',to:'Newcastle',op:1,etaR:[3,6],baseD:2},
+  {from:'London St Pancras',to:'St Albans City',op:2,etaR:[2,4],baseD:1},
+  {from:'London Paddington',to:'Reading',op:3,etaR:[3,5],baseD:0},
+  {from:'Birmingham New St',to:'Coventry',op:4,etaR:[2,5],baseD:3},
+  {from:'London Victoria',to:'Gatwick Airport',op:5,etaR:[3,6],baseD:1},
+  {from:'Manchester Piccadilly',to:'Leeds',op:6,etaR:[4,6],baseD:4},
+  {from:'Glasgow Central',to:'Motherwell',op:7,etaR:[2,4],baseD:2},
+  {from:'Fenchurch Street',to:'Basildon',op:8,etaR:[3,5],baseD:0},
+  {from:'Leeds',to:'York',op:9,etaR:[2,5],baseD:3}
+];
+
+let accaBal=100,accaPool=[],accaPicks={},accaPlaced=null,accaSettling=false,accaTimers=[],accaHistory=[];
+
+function afmt(d){return d.toTimeString().slice(0,5);}
+function afmtSec(d){return d.toTimeString().slice(0,8);}
+
+function accaCalcOdds(delay,eta){
+  const d=eta>3?delay+0.5:delay;
+  const sOT=Math.max(0,3-d),sMN=Math.max(0,3-Math.abs(d-3.5)),sMJ=Math.max(0,d-4);
+  const tot=sOT+sMN+sMJ||1;
+  const pOT=sOT/tot,pMN=sMN/tot,pMJ=sMJ/tot;
+  if(Math.max(pOT,pMN,pMJ)>0.75)return null;
+  const v=()=>0.97+Math.random()*0.06;
+  const o=p=>p>0.01?Math.round((1/p)*0.90*v()*100)/100:null;
+  return{
+    onTime:{label:'On Time',odds:o(pOT),disabled:delay>6,prob:pOT},
+    minor:{label:'Minor Delay',odds:o(pMN),disabled:false,prob:pMN},
+    major:{label:'Major Delay',odds:o(pMJ),disabled:delay<1,prob:pMJ}
+  };
+}
+
+function accaGenPool(){
+  const used=new Set(),trains=[];
+  [...AROUTES].sort(()=>Math.random()-.5).forEach(r=>{
+    if(used.has(r.op)||trains.length>=8)return;
+    const eta=r.etaR[0]+Math.random()*(r.etaR[1]-r.etaR[0]);
+    const delay=Math.max(-1,Math.min(8,r.baseD+Math.random()*3-1));
+    const odds=accaCalcOdds(delay,eta);
+    if(!odds)return;
+    const cut=Math.max(90,eta*60*.5),sl=eta*60;
+    const status=sl<=cut?'closed':sl<=cut+120?'soon':'open';
+    const schedD=new Date(Date.now()+eta*60000);
+    schedD.setSeconds(0,0);
+    trains.push({
+      id:`${r.op}_${Date.now()}_${Math.random().toString(36).slice(2,5)}`,
+      op:AOPS[r.op],opIdx:r.op,from:r.from,to:r.to,
+      eta:Math.round(eta*10)/10,delay:Math.round(delay*10)/10,
+      schedArr:schedD,odds,status
+    });
+    used.add(r.op);
+  });
+  return trains;
+}
+
+function accaTapOdds(id,outcome){
+  if(accaSettling||accaPlaced)return;
+  const t=accaPool.find(x=>x.id===id);if(!t)return;
+  const m=t.odds[outcome];if(!m||m.disabled||!m.odds)return;
+  if(accaPicks[id]){
+    accaPicks[id].outcome=outcome;accaPicks[id].odds=m.odds;
+    accaRenderPool();accaRenderSlip();return;
+  }
+  const nP=Object.keys(accaPicks).length;
+  const pickedOps=new Set(Object.keys(accaPicks).map(i=>accaPool.find(t2=>t2.id===i)?.opIdx).filter(x=>x!=null));
+  if(nP>=5||pickedOps.has(t.opIdx))return;
+  accaPicks[id]={outcome,odds:m.odds,train:t};
+  accaRenderPool();accaRenderSlip();
+}
+
+function accaRemoveLeg(id){
+  delete accaPicks[id];accaRenderPool();accaRenderSlip();
+}
+
+function accaRenderPool(){
+  const grid=document.getElementById('accaGrid');if(!grid)return;
+  const pickedOps=new Set(Object.keys(accaPicks).map(id=>accaPool.find(t=>t.id===id)?.opIdx).filter(x=>x!=null));
+  const nP=Object.keys(accaPicks).length;
+  grid.innerHTML='';
+  const KEYS=['onTime','minor','major'];
+  accaPool.forEach(t=>{
+    const inSlip=!!accaPicks[t.id];
+    const opBlock=!inSlip&&pickedOps.has(t.opIdx);
+    const maxed=!inSlip&&nP>=5;
+    const dis=(opBlock||maxed)&&!inSlip&&!accaSettling;
+    const cls=t.status==='closed';
+    const stMap={open:['ats-open','Open'],soon:['ats-soon','Closing Soon'],closed:['ats-closed','Closed']};
+    const[stC,stL]=stMap[t.status];
+    const oddBtns=KEYS.map(k=>{
+      const m=t.odds[k];
+      const off=m.disabled||!m.odds||cls||(dis&&!inSlip);
+      const sel=inSlip&&accaPicks[t.id].outcome===k;
+      const click=(!off&&!accaSettling&&!accaPlaced)?`onclick="accaTapOdds('${t.id}','${k}')"`:''
+      return`<button class="aob${sel?' aob-sel':''}${off?' aob-dis':''}" ${click}><span class="aob-lbl">${m.label}</span>${m.odds?`<span class="aob-odds">${m.odds.toFixed(2)}</span>`:`<span class="aob-na">n/a</span>`}</button>`;
+    }).join('');
+    const addedRow=inSlip?`<div class="atc-added-row"><span class="atc-added-lbl">✓ In slip — tap to change</span><button class="atc-rm" onclick="accaRemoveLeg('${t.id}')">Remove</button></div>`:'';
+    grid.insertAdjacentHTML('beforeend',`
+      <div class="atc${inSlip?' atc-added':''}${dis?' atc-dis':''}${cls?' atc-cls':''}" id="atc-${t.id}">
+        <div class="atc-head">
+          <div class="atc-left">
+            <div class="atc-op-row">
+              <span class="atc-op-pill" style="background:${t.op.bg};color:${t.op.col};border:1px solid ${t.op.col}44">${t.op.code}</span>
+              <span class="atc-op-name">${t.op.name}</span>
+            </div>
+            <div class="atc-route">${t.from} <span class="atc-arrow">→</span> ${t.to}</div>
+            <div class="atc-sched">Arr <strong>${afmt(t.schedArr)}</strong> · ETA <strong>${t.eta.toFixed(1)}m</strong></div>
+          </div>
+          <div class="atc-right"><span class="atc-status ${stC}">${stL}</span></div>
+        </div>
+        <div class="atc-markets">${oddBtns}</div>
+        ${addedRow}
+      </div>`);
+  });
+  document.getElementById('accaPoolCount').textContent=`${accaPool.filter(t=>t.status!=='closed').length} markets`;
+}
+
+function accaRenderSlip(){
+  const legs=Object.entries(accaPicks);
+  const n=legs.length;
+  const KEYS=['onTime','minor','major'];
+  ['aLegsD','aLegsM'].forEach((elId,mi)=>{
+    const div=document.getElementById(elId);if(!div)return;
+    if(!n){
+      div.innerHTML=mi===0
+        ?`<div class="aslip-empty"><div class="aslip-empty-icon">🚂</div><div class="aslip-empty-title">Empty slip</div><div class="aslip-empty-sub">Tap any odds button on the left to add a leg instantly</div></div>`
+        :`<div style="padding:12px;font-family:var(--mono);font-size:0.68rem;color:#6060a0;text-align:center">Tap odds above to add legs</div>`;
+      return;
+    }
+    div.innerHTML='';
+    legs.forEach(([id,p],i)=>{
+      const outs=KEYS.map(k=>{
+        const m=p.train.odds[k];
+        const off=m.disabled||!m.odds;
+        const on=p.outcome===k;
+        const click=(!accaSettling&&!accaPlaced&&!off)?`onclick="accaChangeLeg('${id}','${k}')"`:'';
+        return`<button class="aso${on?' aso-on':''}${off?' aso-dis':''}" ${click}><span class="aso-lbl">${m.label}</span>${m.odds?`<span class="aso-odds">${m.odds.toFixed(2)}</span>`:''}</button>`;
+      }).join('');
+
+      let resultHtml='';
+      if(accaPlaced){
+        const pl=accaPlaced.legs.find(l=>l.id===id);
+        if(pl&&pl.result){
+          const rc=pl.result==='won'?'asr-win':'asr-lose';
+          const tick=pl.result==='won'?'✓':'✗';
+          const schedStr=afmt(pl.train.schedArr);
+          const actStr=pl.actArr?afmtSec(pl.actArr):'—';
+          let diffStr;
+          if(pl.actDelay<=0){
+            const sec=Math.round(-pl.actDelay*60);
+            const em=Math.floor(sec/60),es=sec%60;
+            diffStr=sec<15?'On time':`${em}m ${es.toString().padStart(2,'0')}s early`;
+          } else {
+            const sec=Math.round(pl.actDelay*60);
+            const lm=Math.floor(sec/60),ls=sec%60;
+            diffStr=`+${lm}m ${ls.toString().padStart(2,'0')}s late`;
+          }
+          resultHtml=`<div class="asleg-result">
+            <div class="asr-row"><span class="asr-lbl">Sched arrival</span><span class="asr-val">${schedStr}</span></div>
+            <div class="asr-row"><span class="asr-lbl">Actual arrival</span><span class="asr-val">${actStr}</span></div>
+            <div class="asr-row"><span class="asr-lbl">Variance</span><span class="${rc}">${diffStr} ${tick}</span></div>
+          </div>`;
+        }
+      }
+
+      let badge='';
+      if(accaPlaced){
+        const pl=accaPlaced.legs.find(l=>l.id===id);
+        if(pl){
+          if(pl.result==='won')badge='<span class="asleg-badge asb-won">WON</span>';
+          else if(pl.result==='lost')badge='<span class="asleg-badge asb-lost">LOST</span>';
+          else badge='<span class="asleg-badge asb-live">LIVE</span>';
+        }
+      }
+      const plForCls=accaPlaced?accaPlaced.legs.find(l=>l.id===id):null;
+      const legCls=plForCls?(plForCls.result==='won'?' asl-won':plForCls.result==='lost'?' asl-lost':''):'';
+
+      div.insertAdjacentHTML('beforeend',`
+        <div class="asleg${legCls}">
+          <div class="asleg-head">
+            <span class="asleg-op">${p.train.op.name}</span>
+            <div style="display:flex;align-items:center;gap:8px">${badge}<span class="asleg-num">LEG ${i+1}</span></div>
+          </div>
+          <div class="asleg-route">${p.train.from} → ${p.train.to}</div>
+          <div class="asleg-outs">${outs}</div>
+          ${!accaPlaced?`<div class="asleg-foot"><span class="asleg-eta">Arr ${afmt(p.train.schedArr)} · ${p.odds.toFixed(2)}×</span><button class="asleg-rm" onclick="accaRemoveLeg('${id}')">✕ Remove</button></div>`:''}
+          ${resultHtml}
+        </div>`);
+    });
+  });
+  accaUpdateFooter();
+  renderLegTracker();
+}
+
+function accaChangeLeg(id,k){
+  if(!accaPicks[id]||accaSettling||accaPlaced)return;
+  accaPicks[id].outcome=k;accaPicks[id].odds=accaPicks[id].train.odds[k].odds;
+  accaRenderSlip();accaRenderPool();
+}
+
+function accaUpdateFooter(){
+  const legs=Object.entries(accaPicks);
+  const n=legs.length;
+  const combined=n?legs.reduce((a,[,p])=>a*(p.odds||1),1):0;
+  const stD=parseFloat(document.getElementById('aStakeD').value)||0;
+  const stM=parseFloat(document.getElementById('aStakeM').value)||0;
+  const canPlace=(n>=3)&&!accaSettling&&!accaPlaced;
+
+  const odD=document.getElementById('aOddsD');
+  if(n>=2){odD.textContent=combined.toFixed(2)+'×';odD.className='asf-combined';}
+  else{odD.textContent='—';odD.className='asf-combined dim';}
+  document.getElementById('aRetD').textContent=stD>0&&n>=3?`£${(stD*combined).toFixed(2)}`:'—';
+  document.getElementById('aPbD').disabled=!canPlace||stD<=0||stD>accaBal;
+
+  const odM=document.getElementById('aOddsM');
+  if(n>=2){odM.textContent=combined.toFixed(2)+'×';odM.className='asf-combined';}
+  else{odM.textContent='—';odM.className='asf-combined dim';}
+  document.getElementById('aRetM').textContent=stM>0&&n>=3?`£${(stM*combined).toFixed(2)}`:'—';
+  document.getElementById('aPbM').disabled=!canPlace||stM<=0||stM>accaBal;
+  // Calculate countdown sub label first
+  const total=accaPool.filter(t=>t.status!=='closed').length;
+  let sub;
+  if(accaSettling||accaPlaced){
+    const settled=accaPlaced?accaPlaced.legs.filter(l=>l.result).length:0;
+    const total2=accaPlaced?accaPlaced.legs.length:0;
+    sub=settled===total2?'All routes settled':settled===0?'Settling…':`${settled} of ${total2} routes settled`;
+  } else if(n===0){
+    sub=`${total} trains available · pick 3 to bet`;
+  } else if(n<3){
+    const need=3-n;
+    sub=`${need} more leg${need>1?'s':''} to unlock · ${total-n} trains remaining`;
+  } else if(n<5){
+    const more=5-n;
+    sub=`${n} legs ready · add up to ${more} more or enter a stake`;
+  } else {
+    sub='5 legs · maximum reached · enter a stake';
+  }
+  // Mobile bar
+  const pill=document.getElementById('aMobLegPill');
+  if(pill){pill.textContent=`${n} leg${n!==1?'s':''}`;pill.className=n>0?'amob-bar-pill':'amob-bar-pill lp-dim';}
+  const slipPill=document.getElementById('aMobSlipPill');
+  if(slipPill)slipPill.textContent=`${n} leg${n!==1?'s':''}`;
+  const viewBtn=document.getElementById('aMobViewBtn');
+  if(viewBtn){
+    viewBtn.className=n>0?'amob-view-btn':'amob-view-btn vb-dim';
+    viewBtn.textContent=n>=2?`${combined.toFixed(2)}× →`:'View →';
+  }
+  const mobSub=document.getElementById('aMobSub');
+  if(mobSub)mobSub.textContent=sub;
+  const mobSlipSub=document.getElementById('aMobSlipSub');
+  if(mobSlipSub)mobSlipSub.textContent=sub;
+  const slipSubEl=document.getElementById('aSlipSub');
+  if(slipSubEl)slipSubEl.textContent=sub;
+  renderLegTracker();
+  const lc=document.getElementById('aLegCount');
+  if(lc){lc.textContent=`${n} leg${n!==1?'s':''}`;lc.className=n>0?'aslip-count':'aslip-count lc-dim';}
+}
+
+function renderLegTracker(){
+  ['aMobLegTracker','aDesktopLegTracker'].forEach(function(elId){
+    const el=document.getElementById(elId);
+    if(!el)return;
+    const MAX=5;
+    const legs=Object.entries(accaPicks);
+    const n=legs.length;
+    el.innerHTML='';
+    for(let i=0;i<MAX;i++){
+      const circle=document.createElement('div');
+      circle.className='alt-circle';
+      if(i>=n){
+        circle.classList.add('alt-empty');
+      } else {
+        const [id]=legs[i];
+        if(accaPlaced){
+          const pl=accaPlaced.legs.find(l=>l.id===id);
+          if(pl&&pl.result==='won'){circle.classList.add('alt-won');circle.textContent='✓';}
+          else if(pl&&pl.result==='lost'){circle.classList.add('alt-lost');circle.textContent='✗';}
+          else{circle.classList.add('alt-live');}
+        } else {
+          circle.classList.add('alt-added');
+        }
+      }
+      el.appendChild(circle);
+    }
+  });
+}
+
+function aQs(v){document.getElementById('aStakeD').value=v;accaUpdateFooter();}
+function aQsM(v){document.getElementById('aStakeM').value=v;accaUpdateFooter();}
+document.getElementById('aStakeD').addEventListener('input',accaUpdateFooter);
+document.getElementById('aStakeM').addEventListener('input',accaUpdateFooter);
+
+function accaPlace(){
+  const legs=Object.entries(accaPicks);if(legs.length<3)return;
+  const isMob=window.innerWidth<=720;
+  const stake=parseFloat(isMob?document.getElementById('aStakeM').value:document.getElementById('aStakeD').value);
+  if(!stake||stake>accaBal)return;
+  accaBal-=stake;accaUpdateBal();
+  const combined=legs.reduce((a,[,p])=>a*p.odds,1);
+  accaPlaced={
+    legs:legs.map(([id,p])=>({id,train:p.train,outcome:p.outcome,odds:p.odds,result:null,actDelay:null,actArr:null})),
+    stake,combined,potReturn:stake*combined
+  };
+  accaSettling=true;
+  ['aPbD','aPbM'].forEach(b=>document.getElementById(b).disabled=true);
+  ['aStakeD','aStakeM'].forEach(b=>document.getElementById(b).disabled=true);
+  document.querySelectorAll('.asf-q').forEach(b=>b.disabled=true);
+  ['aFillD','aFillM'].forEach(id=>document.getElementById(id).style.width='0%');
+  accaRenderSlip();
+  accaPlaced.legs.forEach((leg,i)=>{
+    const d=1200+(i*1400)+Math.random()*800;
+    accaTimers.push(setTimeout(()=>accaSettleLeg(i),d));
+  });
+  // Safety fallback — force settle everything after 15s
+  accaTimers.push(setTimeout(()=>{
+    if(!accaPlaced)return;
+    accaPlaced.legs.forEach((_,i)=>{if(!accaPlaced.legs[i].result)accaSettleLeg(i)});
+  },15000));
+}
+
+function accaSettleLeg(i){
+  if(!accaPlaced)return;
+  const leg=accaPlaced.legs[i];
+  const d2=leg.train.eta>3?leg.train.delay+0.5:leg.train.delay;
+  const sOT=Math.max(0,3-d2),sMN=Math.max(0,3-Math.abs(d2-3.5));
+  const tot=sOT+sMN+Math.max(0,d2-4)||1;
+  const noise=Math.random()*.16-.08;
+  const pOTn=Math.max(0.04,Math.min(0.90,(sOT/tot)+noise));
+  const pMNn=Math.max(0.04,Math.min(0.90,(sMN/tot)-noise*.5));
+  const r=Math.random();
+  let actDelay,band;
+  if(r<pOTn){actDelay=Math.random()*1.9;band='onTime';}
+  else if(r<pOTn+pMNn){actDelay=2+Math.random()*2.9;band='minor';}
+  else{actDelay=5+Math.random()*5;band='major';}
+  leg.actDelay=actDelay;
+  leg.result=band===leg.outcome?'won':'lost';
+  leg.actArr=new Date(leg.train.schedArr.getTime()+actDelay*60000);
+  const done=accaPlaced.legs.filter(l=>l.result).length;
+  const pct=(done/accaPlaced.legs.length*100)+'%';
+  ['aFillD','aFillM'].forEach(id=>document.getElementById(id).style.width=pct);
+  accaRenderSlip();
+  // Auto-scroll to next pending leg on mobile
+  if(window.innerWidth<=720){
+    setTimeout(()=>{
+      const legsWrap=document.getElementById('aLegsM');
+      if(!legsWrap)return;
+      // Find the first leg card without a won/lost class (still pending)
+      const pending=legsWrap.querySelector('.asleg:not(.asl-won):not(.asl-lost)');
+      if(pending)pending.scrollIntoView({behavior:'smooth',block:'start'});
+      else legsWrap.scrollTo({top:0,behavior:'smooth'});
+    },400);
+  }
+  if(accaPlaced.legs.every(l=>l.result))setTimeout(accaShowResult,700);
+}
+
+function accaShowResult(){
+  const allWon=accaPlaced.legs.every(l=>l.result==='won');
+  ['D','M'].forEach(s=>{
+    const foot=document.getElementById(`aFoot${s}`);
+    foot.style.display='none';
+    document.getElementById(`aFill${s}`).style.width='100%';
+    const rb=document.getElementById(`aRb${s}`);
+    rb.className=`arb arb-show ${allWon?'arb-win':'arb-lose'}`;
+    document.getElementById(`aRbIcon${s}`).textContent=allWon?'🎉':'😔';
+    document.getElementById(`aRbLbl${s}`).textContent=allWon?'Acca Winner!':'Acca Lost';
+    document.getElementById(`aRbVal${s}`).textContent=allWon?`+£${accaPlaced.potReturn.toFixed(2)}`:`-£${accaPlaced.stake.toFixed(2)}`;
+    const w=accaPlaced.legs.filter(l=>l.result==='won').length;
+    document.getElementById(`aRbDet${s}`).textContent=allWon
+      ?`${accaPlaced.legs.length}-leg · ${accaPlaced.combined.toFixed(2)}× · Stake £${accaPlaced.stake.toFixed(2)}`
+      :`${w}/${accaPlaced.legs.length} legs won`;
+  });
+  if(allWon){accaBal+=accaPlaced.potReturn;accaUpdateBal();}
+  accaHistory.unshift({w:allWon,lbl:`${accaPlaced.legs.length}L ${allWon?'+':'−'}£${allWon?accaPlaced.potReturn.toFixed(2):accaPlaced.stake.toFixed(2)}`});
+  accaSettling=false;accaRenderHist();
+  // Scroll result into view
+  setTimeout(()=>{
+    const rb=document.getElementById(window.innerWidth<=720?'aRbM':'aRbD');
+    if(rb)rb.scrollIntoView({behavior:'smooth',block:'start'});
+  },350);
+  // On mobile: open overlay
+  if(window.innerWidth<=720){
+    openMobSlip();
+  }
+}
+
+function accaReset(){
+  accaPicks={};accaPlaced=null;accaSettling=false;
+  accaTimers.forEach(clearTimeout);accaTimers=[];
+  ['D','M'].forEach(s=>{
+    const rb=document.getElementById(`aRb${s}`);
+    rb.className='arb';rb.style.display='none';
+    const foot=document.getElementById(`aFoot${s}`);
+    foot.style.display='';
+    document.getElementById(`aFill${s}`).style.width='0%';
+  });
+  ['aStakeD','aStakeM'].forEach(b=>{
+    const el=document.getElementById(b);
+    el.disabled=false;el.value='';
+  });
+  document.querySelectorAll('.asf-q').forEach(b=>b.disabled=false);
+  closeMobSlip();
+  accaRenderPool();accaRenderSlip();
+}
+
+function accaUpdateBal(){document.getElementById('accaBal').textContent=`£${accaBal.toFixed(2)}`;}
+
+function accaRenderHist(){
+  const el=document.getElementById('aHistD');if(!el)return;
+  el.innerHTML='<span class="ahist-lbl">Recent:</span>';
+  accaHistory.slice(0,6).forEach(h=>{
+    el.insertAdjacentHTML('beforeend',`<span class="ahi ${h.w?'ahi-w':'ahi-l'}">${h.lbl}</span>`);
+  });
+}
+
+function accaRefreshPool(){
+  if(accaSettling||accaPlaced)return;
+  accaPool.forEach(t=>{
+    t.eta=Math.max(0.4,t.eta-5/60);
+    t.delay=Math.max(-1,Math.min(8,t.delay+(Math.random()*.4-.2)));
+    const cut=Math.max(90,t.eta*60*.5),sl=t.eta*60;
+    t.status=sl<=cut?'closed':sl<=cut+120?'soon':'open';
+    const no=accaCalcOdds(t.delay,t.eta);if(no)t.odds=no;
+  });
+  const expired=accaPool.filter(t=>t.eta<0.4||t.status==='closed');
+  expired.forEach(t=>{delete accaPicks[t.id];});
+  accaPool=accaPool.filter(t=>t.eta>=0.4&&t.status!=='closed');
+  if(accaPool.length<6){
+    const eo=new Set(accaPool.map(t=>t.opIdx));
+    accaGenPool().filter(t=>!eo.has(t.opIdx)).forEach(t=>accaPool.push(t));
+    if(accaPool.length>8)accaPool=accaPool.slice(0,8);
+  }
+  accaRenderPool();accaRenderSlip();
+}
+
+function openMobSlip(){
+  document.getElementById('aMobSlip').classList.add('slip-open');
+  document.body.style.overflow='hidden';
+}
+function closeMobSlip(){
+  document.getElementById('aMobSlip').classList.remove('slip-open');
+  document.body.style.overflow='';
+}
+
+setInterval(accaRefreshPool,5000);
+
+/* ════════════════════════════════════════
+   JOURNEY JS
+════════════════════════════════════════ */
+const J={dep:"08:52",arr:"14:38",origin:"Edinburgh Waverley",dest:"London Euston",
+  ckps:[
+    {name:"Edinburgh Waverley",sched:0,      delay:0,   type:"origin",lat:55.9521,lng:-3.1892,plat:"2"},
+    {name:"Carlisle",          sched:73*60,  delay:0,   type:"ckp",   lat:54.8906,lng:-2.9333,plat:"3"},
+    {name:"Lancaster",         sched:124*60, delay:90,  type:"ckp",   lat:54.0487,lng:-2.8025,plat:"3"},
+    {name:"Preston",           sched:143*60, delay:240, type:"ckp",   lat:53.7565,lng:-2.7075,plat:"4"},
+    {name:"Crewe",             sched:195*60, delay:420, type:"ckp",   lat:53.0891,lng:-2.4333,plat:"12"},
+    {name:"Stafford",          sched:217*60, delay:540, type:"ckp",   lat:52.8038,lng:-2.1208,plat:"4"},
+    {name:"London Euston",     sched:346*60, delay:720, type:"dest",  lat:51.5280,lng:-0.1339,plat:"3"}
+  ]};
+const BANDS=[
+  {id:"ontime",label:"On time",  short:"On time", test:d=>d<=0,       odds:1.55},
+  {id:"slight",label:"0–2m late",short:"0–2 late",test:d=>d>=1&&d<=2, odds:6.64},
+  {id:"mid",   label:"3–5m late",short:"3–5 late",test:d=>d>=3&&d<=5, odds:7.75},
+  {id:"heavy", label:"6m+ late", short:"6+ late", test:d=>d>=6,       odds:6.64}
+];
+const JCLOSE=5*60;
+const JROW_H=82,JDOT_Y=18,JSTRIP_PAD=14;
+let JS={simSec:0,running:false,speed:300,tab:"singles",balance:100,selCkp:1,
+        pendingStake:5,pendingBand:null,singles:[],lastSettled:-1,screen:"jlobby"};
+let jInited=false;
+const J$=id=>document.getElementById(id);
+const jEl=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const jPad2=n=>String(n).padStart(2,'0');
+function jFmtT(s){const t=8*3600+52*60+s;return jPad2(Math.floor(t/3600)%24)+':'+jPad2(Math.floor(t/60)%60)}
+function jFmtD(s){const m=Math.round(s/60);if(m===0)return'On time';if(m<0)return Math.abs(m)+'m early';return m+'m late'}
+function jCkpSt(i){const c=J.ckps[i];if(c.type==='origin')return'origin';const settle=c.sched+c.delay,close=c.sched-JCLOSE;if(JS.simSec>=settle)return'settled';if(JS.simSec>=close)return'inflight';return'open'}
+function jDMins(i){return Math.round(J.ckps[i].delay/60)}
+function jWinBand(i){const d=jDMins(i);return BANDS.find(b=>b.test(d))}
+function jLiveDelay(){let d=0;J.ckps.forEach(c=>{if(JS.simSec>=c.sched+c.delay)d=c.delay});return Math.round(d/60)}
+function jFirstOpen(){for(let i=1;i<J.ckps.length;i++){const s=jCkpSt(i);if(s==='open'||s==='inflight')return i}return J.ckps.length-1}
+function jTPos(){const a=J.ckps.map(c=>c.sched+c.delay);if(JS.simSec<a[0])return{started:false,idx:0,frac:0,next:1};const L=a.length-1;if(JS.simSec>=a[L])return{started:true,arrived:true,idx:L,frac:1,next:L};for(let i=0;i<L;i++){if(JS.simSec>=a[i]&&JS.simSec<a[i+1])return{started:true,idx:i,frac:(JS.simSec-a[i])/(a[i+1]-a[i]),next:i+1}}return{started:false,idx:0,frac:0,next:1}}
+function jLerp(a,b,t){return[a.lat+(b.lat-a.lat)*t,a.lng+(b.lng-a.lng)*t]}
+function jSettle(){
+  for(let i=Math.max(1,JS.lastSettled+1);i<J.ckps.length;i++){
+    if(jCkpSt(i)!=='settled')break;
+    JS.lastSettled=i;if(i===0)continue;
+    JS.singles.forEach(b=>{
+      if(b.ckp===i&&b.status==='pending'){
+        if(b.type==='direction'){
+          // Direction bet: compare actual delay at this checkpoint vs baseline when bet was placed
+          const actualDelay=jDMins(i);
+          const won=(b.pick==='recover'&&actualDelay<b.baselineDelay)||(b.pick==='worse'&&actualDelay>=b.baselineDelay);
+          if(won){b.status='won';b.payout=b.stake*b.odds;JS.balance+=b.payout;jToast('✓ Direction hit · '+J.ckps[i].name+' · +£'+b.payout.toFixed(2),'win')}
+          else{b.status='lost';b.payout=0;jToast('✗ Direction lost · '+J.ckps[i].name,'loss')}
+        } else {
+          const wb=jWinBand(i);
+          if(b.band===wb.id){b.status='won';b.payout=b.stake*b.odds;JS.balance+=b.payout;jToast('✓ '+J.ckps[i].name+' · +£'+b.payout.toFixed(2),'win')}
+          else{b.status='lost';b.payout=0}
+        }
+      }
+    });
+  }
+}
+let jLastT=null;
+function jLoop(ts){
+  if(!document.getElementById('screen-journey').classList.contains('active')){jLastT=null;requestAnimationFrame(jLoop);return}
+  if(jLastT==null)jLastT=ts;
+  const dt=(ts-jLastT)/1000;jLastT=ts;
+  if(JS.running){
+    JS.simSec+=dt*JS.speed;
+    const fin=J.ckps[J.ckps.length-1];
+    if(JS.simSec>=fin.sched+fin.delay+10){JS.simSec=fin.sched+fin.delay+10;JS.running=false}
+    jSettle();
+  }
+  if(JS.screen==='jservice')jUpdateTracker();
+  try{jRenderService();}catch(e){console.warn('jRenderService error:',e)}
+  jRenderLobby();jUpdateMapTrain();
+  requestAnimationFrame(jLoop);
+}
+let jStripBuilt=false;
+function jUpdateTracker(){
+  const rows=document.querySelectorAll('.ckp-row');if(!rows.length)return;
+  const pos=jTPos();const N=J.ckps.length;
+  const nextIdx=pos.started&&!pos.arrived?pos.next:-1;
+  rows.forEach((row,i)=>{
+    const dot=row.querySelector('.ckp-dot');if(!dot)return;
+    dot.className='ckp-dot';
+    if(i===0)dot.classList.add('origin');
+    else if(jCkpSt(i)==='settled')dot.classList.add('passed');
+    else if(i===JS.selCkp)dot.classList.add('sel');
+    row.classList.toggle('sel-row',i===JS.selCkp&&J.ckps[i].type!=='origin');
+    const nr=row.querySelector('.ckp-name-row');
+    if(nr){const existing=nr.querySelector('.next-pill');if(i===nextIdx&&jCkpSt(i)!=='settled'){if(!existing){const p=document.createElement('span');p.className='next-pill';p.textContent='Next';nr.appendChild(p)}}else if(existing){existing.remove()}}
+  });
+  const firstDotY=JSTRIP_PAD+JDOT_Y;const totalH=(N-1)*JROW_H;
+  const tk=J$('line-track');if(tk){tk.style.top=firstDotY+'px';tk.style.height=totalH+'px'}
+  const passedIdx=pos.started?pos.idx:0;const passedH=pos.started?passedIdx*JROW_H:0;
+  const activeH=pos.started&&!pos.arrived?pos.frac*JROW_H:0;const totalFilled=passedH+activeH;
+  const fl=J$('line-filled');if(fl){fl.style.top=firstDotY+'px';fl.style.height=passedH+'px'}
+  const la=J$('line-active');if(la){la.style.top=(firstDotY+passedH)+'px';la.style.height=activeH+'px'}
+  const td=J$('train-dot');
+  if(td){if(!pos.started){td.style.display='none'}else{td.style.display='flex';td.style.top=(firstDotY+totalFilled-11)+'px'}}
+  rows.forEach((row,i)=>{
+    const c=J.ckps[i],s=jCkpSt(i);
+    const meta=row.querySelector('.ckp-meta');const actEl=row.querySelector('.ckp-actual');
+    if(meta){
+      if(c.type==='origin'){meta.textContent='Origin';return}
+      if(s==='settled'){
+        const wb=jWinBand(i);
+        let html=jFmtD(c.delay)+' <span class="band-pill win">'+wb.short+'</span>';
+        const myBet=JS.singles.find(b=>b.ckp===i);
+        if(myBet){if(myBet.status==='won')html+=' <span class="result-pill result-won">✓ +£'+myBet.payout.toFixed(2)+'</span>';else if(myBet.status==='lost')html+=' <span class="result-pill result-lost">✗ Lost</span>'}
+        meta.innerHTML=html;
+        if(actEl){actEl.textContent=jFmtT(c.sched+c.delay);actEl.className='ckp-actual'+(c.delay>0?' late':c.delay<0?' early':'')}
+      }else if(s==='inflight'){
+        const myBet=JS.singles.find(b=>b.ckp===i);
+        meta.innerHTML='Betting closed · awaiting arrival'+(myBet?' <span class="result-pill result-pending">Bet pending</span>':'');
+      }else if(s==='open'){
+        const cl=Math.max(0,(c.sched-JCLOSE)-JS.simSec);
+        const myBet=JS.singles.find(b=>b.ckp===i);
+        meta.innerHTML='Open · closes in '+Math.floor(cl/60)+'m '+jPad2(Math.floor(cl%60))+'s'+(myBet?' <span class="result-pill result-pending">Bet placed</span>':'');
+      }
+    }
+  });
+}
+function jBuildStrip(){
+  const rows=J$('ckp-rows');rows.innerHTML='';
+  J.ckps.forEach((c,i)=>{
+    const row=jEl('div','ckp-row');row.dataset.idx=i;
+    const times=jEl('div','ckp-times');times.innerHTML='<div class="ckp-sched">'+jFmtT(c.sched)+'</div><div class="ckp-actual" style="visibility:hidden">'+jFmtT(c.sched)+'</div>';
+    row.appendChild(times);
+    const dc=jEl('div','ckp-dot-col');dc.appendChild(jEl('div','ckp-dot'+(c.type==='origin'?' origin':'')));row.appendChild(dc);
+    const info=jEl('div','ckp-info');
+    const nr=jEl('div','ckp-name-row');nr.appendChild(jEl('span','ckp-name',c.name));
+    if(c.plat){const p=jEl('span','plat-pill');p.innerHTML='Plat <b>'+c.plat+'</b>';nr.appendChild(p)}
+    info.appendChild(nr);info.appendChild(jEl('div','ckp-meta',''));
+    row.appendChild(info);
+    if(c.type!=='origin'){row.style.cursor='pointer';row.addEventListener('click',()=>{JS.selCkp=i;JS.pendingBand=null;_jBk=''})}
+    rows.appendChild(row);
+  });
+  jStripBuilt=true;
+}
+let _jBk='';
+let _jSuggKey='',_jSuggDismissed=false;
+function jRenderService(){
+  if(JS.screen!=='jservice')return;
+  J$('sh-route').innerHTML=J.origin+' <span class="arr">→</span> '+J.dest;
+  J$('sh-dep').textContent=J.dep;J$('sh-arr').textContent=J.arr;
+  J$('sim-now').textContent=jFmtT(JS.simSec);J$('j-balance').textContent=JS.balance.toFixed(2);
+  jUpdatePauseBtn();
+  const d=jLiveDelay();const de=J$('sh-delay');
+  if(JS.simSec<1){de.textContent='Awaiting departure';de.className='on-time'}
+  else if(d===0){de.textContent='On time';de.className='on-time'}
+  else if(d<0){de.textContent=Math.abs(d)+'m early';de.className='on-time'}
+  else{de.textContent=d+'m late';de.className='late-txt'}
+  if(JS.tab==='singles'){if(!jStripBuilt)jBuildStrip();jRenderBet();jRenderSuggestion()}
+  if(JS.tab==='mybets')jRenderMyBets();
+  if(JS.tab==='audit')jRenderAudit();
+  const pnl=jCalcPnl();const bar=J$('pnl-bar');
+  if(pnl.staked>0&&bar){bar.style.display='flex';J$('pnl-staked').textContent='£'+pnl.staked.toFixed(2);J$('pnl-returned').textContent='£'+pnl.returned.toFixed(2);const netEl=J$('pnl-net');netEl.textContent=(pnl.net>=0?'+':'−')+'£'+Math.abs(pnl.net).toFixed(2);netEl.className=pnl.net>=0?'pnl-pos':'pnl-neg'}
+}
+function jCalcPnl(){let staked=0,returned=0,pending=0;JS.singles.forEach(b=>{staked+=b.stake;if(b.status==='won')returned+=b.payout;if(b.status==='pending')pending+=b.stake});return{staked,returned,net:returned-staked,pending}}
+function jRenderBet(){
+  let idx=JS.selCkp;
+  if(jCkpSt(idx)==='settled'||jCkpSt(idx)==='inflight'||J.ckps[idx].type==='origin'){
+    let advanced=false;
+    for(let i=idx+1;i<J.ckps.length;i++){if(jCkpSt(i)==='open'){JS.selCkp=i;idx=i;advanced=true;_jBk='';break}}
+    if(!advanced){
+      const con=J$('bet-container');const key='done|'+JS.balance;if(key===_jBk)return;_jBk=key;con.innerHTML='';
+      const pnl=jCalcPnl();const box=jEl('div','bet-panel');
+      box.innerHTML='<div class="bet-eyebrow">Journey complete</div><div class="bet-title">All checkpoints settled</div>'+
+        '<div class="pnl-summary"><div class="pnl-row"><span>Total staked</span><span class="pnl-val">£'+pnl.staked.toFixed(2)+'</span></div>'+
+        '<div class="pnl-row"><span>Total returned</span><span class="pnl-val">£'+pnl.returned.toFixed(2)+'</span></div>'+
+        '<div class="pnl-row pnl-net"><span>Net</span><span class="pnl-val '+(pnl.net>=0?'pnl-pos':'pnl-neg')+'">'+(pnl.net>=0?'+':'')+'£'+Math.abs(pnl.net).toFixed(2)+'</span></div></div>'+
+        '<button class="btn-primary" style="width:100%;margin-top:12px" onclick="jResetJourney()">Play again</button>';
+      con.appendChild(box);return;
+    }
+  }
+  const c=J.ckps[idx],s=jCkpSt(idx);
+  const key=idx+'|'+s+'|'+JS.pendingBand+'|'+JS.pendingStake;
+  if(key===_jBk)return;_jBk=key;
+  const con=J$('bet-container');if(!con)return;con.innerHTML='';
+  const rttHtml=jRenderRTTPanel(c.name);if(rttHtml){con.innerHTML=rttHtml}
+  const rttStats=jGetRTTStats(c.name);
+  if(rttStats&&rttStats.odds){const o=rttStats.odds;if(o.onTime)BANDS[0].odds=o.onTime;if(o.slight)BANDS[1].odds=o.slight;if(o.mid)BANDS[2].odds=o.mid;if(o.heavy)BANDS[3].odds=o.heavy}
+  const panel=jEl('div','bet-panel');
+  panel.innerHTML='<div class="bet-eyebrow">'+c.name+'</div><div class="bet-title">How late?</div><div class="bet-sub">Sched '+jFmtT(c.sched)+' · betting closes 5 min before</div>';
+  const bg=jEl('div','bands');
+  BANDS.forEach(b=>{const btn=jEl('button','band-btn'+(JS.pendingBand===b.id?' selected':''));btn.innerHTML='<span class="band-name">'+b.label+'</span><span class="band-odds">'+b.odds.toFixed(2)+'x</span>';btn.addEventListener('click',()=>{JS.pendingBand=b.id;_jBk=''});bg.appendChild(btn)});
+  panel.appendChild(bg);
+  const sr=jEl('div','stake-row');sr.appendChild(jEl('span','stake-lbl','Stake'));
+  [1,5,10,25].forEach(a=>{const ch=jEl('button','stake-chip'+(JS.pendingStake===a?' active':''),'£'+a);ch.addEventListener('click',()=>{JS.pendingStake=a;_jBk=''});sr.appendChild(ch)});
+  panel.appendChild(sr);
+  const cr=jEl('div','confirm-row');
+  const sel=BANDS.find(b=>b.id===JS.pendingBand);const ret=sel?JS.pendingStake*sel.odds:0;
+  const rb=jEl('div','confirm-returns');rb.innerHTML='Returns<strong>£'+ret.toFixed(2)+'</strong>';cr.appendChild(rb);
+  const cb=jEl('button','btn-confirm','Confirm');cb.disabled=!sel||JS.pendingStake>JS.balance;
+  cb.addEventListener('click',()=>{
+    if(!JS.pendingBand)return;const band=BANDS.find(b=>b.id===JS.pendingBand);
+    if(JS.pendingStake>JS.balance){jToast('Insufficient balance','loss');return}
+    JS.balance-=JS.pendingStake;
+    JS.singles.push({id:Date.now()+'_'+Math.random().toString(36).slice(2,6),ckp:idx,band:band.id,stake:JS.pendingStake,odds:band.odds,status:'pending',payout:0});
+    jToast('Bet placed · £'+JS.pendingStake+' on '+band.short);JS.pendingBand=null;_jBk='';
+    for(let i=idx+1;i<J.ckps.length;i++){if(jCkpSt(i)==='open'){JS.selCkp=i;break}}
+  });
+  cr.appendChild(cb);panel.appendChild(cr);con.appendChild(panel);
+}
+function jRenderMyBets(){
+  const c=J$('bets-list');c.innerHTML='';
+  if(!JS.singles.length){c.innerHTML='<div class="notice"><strong>No bets yet</strong>Place a single on the Singles tab.</div>';return}
+  const pnl=jCalcPnl();const header=jEl('div','pnl-header');
+  header.innerHTML='<div class="pnl-header-title">This session</div><div class="pnl-header-grid">'+
+    '<div class="pnl-h-item"><div class="pnl-h-lbl">Staked</div><div class="pnl-h-val">£'+pnl.staked.toFixed(2)+'</div></div>'+
+    '<div class="pnl-h-item"><div class="pnl-h-lbl">Returned</div><div class="pnl-h-val">£'+pnl.returned.toFixed(2)+'</div></div>'+
+    '<div class="pnl-h-item"><div class="pnl-h-lbl">Pending</div><div class="pnl-h-val">£'+pnl.pending.toFixed(2)+'</div></div>'+
+    '<div class="pnl-h-item"><div class="pnl-h-lbl">Net P&amp;L</div><div class="pnl-h-val '+(pnl.net>=0?'pnl-pos':'pnl-neg')+'">'+(pnl.net>=0?'+':'−')+'£'+Math.abs(pnl.net).toFixed(2)+'</div></div></div>';
+  c.appendChild(header);
+  JS.singles.forEach(b=>{
+    const ck=J.ckps[b.ckp];
+    const item=jEl('div','bet-item');
+    let routeStr,subStr;
+    if(b.type==='direction'){
+      routeStr=ck.name+' · '+(b.pick==='worse'?'Getting Worse':'Recovering');
+      subStr='Was '+(b.baselineDelay<=0?'on time':b.baselineDelay+'m late')+' · £'+b.stake.toFixed(2)+' @ '+b.odds.toFixed(2)+'×';
+    } else {
+      const band=BANDS.find(x=>x.id===b.band);
+      routeStr=ck.name+' · '+band.short;
+      subStr='£'+b.stake.toFixed(2)+' @ '+b.odds.toFixed(2)+'×';
+    }
+    item.innerHTML='<div><div class="bet-item-route">'+routeStr+'</div><div class="bet-item-sub">'+subStr+'</div></div>';
+    const res=jEl('div','bet-item-result');
+    if(b.status==='won'){res.className='bet-item-result r-won';res.innerHTML='Won<span class="amt">+£'+b.payout.toFixed(2)+'</span>'}
+    else if(b.status==='lost'){res.className='bet-item-result r-lost';res.innerHTML='Lost<span class="amt">–£'+b.stake.toFixed(2)+'</span>'}
+    else{res.className='bet-item-result r-pending';res.innerHTML='Pending<span class="amt">£'+(b.stake*b.odds).toFixed(2)+'</span>'}
+    item.appendChild(res);c.appendChild(item);
+  });
+}
+// Solari board
+const JSALPHA='ABCDEFGHIJKLMNOPQRSTUVWXYZ';const JSNUMS='0123456789';let jBoardFlipped=false;
+function jSbMakeTime(id,text,dimCls){const e=J$(id);if(!e)return;e.innerHTML='';text.split('').forEach(ch=>{const d=document.createElement('div');d.className=(ch===':'?'sb-fc col':'sb-fc')+(dimCls?' '+dimCls:'');d.textContent=ch;e.appendChild(d)})}
+function jSbMakePlat(id,text,dimCls){const e=J$(id);if(!e)return;e.innerHTML='';text.split('').forEach(ch=>{const d=document.createElement('div');d.className='sb-pc'+(dimCls?' '+dimCls:'');d.textContent=ch;e.appendChild(d)})}
+function jSbFlipTime(id,text,delay){const e=J$(id);if(!e)return;e.innerHTML='';text.split('').forEach((ch,i)=>{const d=document.createElement('div');d.className=ch===':'?'sb-fc col':'sb-fc';d.textContent='·';e.appendChild(d);if(ch===':'){setTimeout(()=>{d.textContent=':'},delay);return}const flips=10+Math.floor(Math.random()*5);let c=0;setTimeout(()=>{const iv=setInterval(()=>{c++;if(c>=flips){d.textContent=ch;d.style.color='';clearInterval(iv)}else{d.textContent=JSNUMS[Math.floor(Math.random()*10)];d.style.color='#F5A00055'}},65)},delay+i*90)})}
+function jSbMakeDest(id,line1,line2,dim){const e=J$(id);if(!e)return;e.innerHTML='';const r1=document.createElement('div');r1.className='sb-dest-row'+(dim?' dim':'');r1.textContent=line1.toUpperCase();const r2=document.createElement('div');r2.className='sb-dest-row ar-row'+(dim?' dim':'');r2.textContent='→ '+line2.toUpperCase();e.appendChild(r1);e.appendChild(r2)}
+function jSbFlipDest(id,line1,line2,delay){const e=J$(id);if(!e)return;e.innerHTML='';const r1=document.createElement('div');r1.className='sb-dest-row';r1.textContent='· · · · ·';const r2=document.createElement('div');r2.className='sb-dest-row ar-row';r2.textContent='· · · · ·';e.appendChild(r1);e.appendChild(r2);const u1=line1.toUpperCase();const u2='→ '+line2.toUpperCase();let t1=0;const tot1=24;setTimeout(()=>{const iv=setInterval(()=>{t1++;if(t1>=tot1){r1.textContent=u1;clearInterval(iv);return}const res=Math.floor((t1/tot1)*u1.length);let d=u1.substring(0,res);for(let i=res;i<u1.length;i++)d+=u1[i]===' '?' ':JSALPHA[Math.floor(Math.random()*26)];r1.textContent=d},55)},delay);const d2=delay+(tot1*55)+300;let t2=0;const tot2=22;setTimeout(()=>{const iv=setInterval(()=>{t2++;if(t2>=tot2){r2.textContent=u2;clearInterval(iv);return}const res=Math.floor((t2/tot2)*u2.length);let d=u2.substring(0,res);for(let i=res;i<u2.length;i++)d+=u2[i]===' '||u2[i]==='→'?u2[i]:JSALPHA[Math.floor(Math.random()*26)];r2.textContent=d},55)},d2)}
+function jSbFlipPlat(id,text,delay){const e=J$(id);if(!e)return;e.innerHTML='';text.split('').forEach((ch,i)=>{const d=document.createElement('div');d.className='sb-pc';d.textContent='·';e.appendChild(d);const flips=9+i*3;let c=0;setTimeout(()=>{const iv=setInterval(()=>{c++;if(c>=flips){d.textContent=ch;d.style.color='';clearInterval(iv)}else{d.textContent=JSNUMS[Math.floor(Math.random()*10)];d.style.color='#EFE8DB33'}},60)},delay+i*140)})}
+function jSbFlipStatus(id,text,delay){const e=J$(id);if(!e)return;const upper=text.toUpperCase();e.textContent='· · · ·';let ticks=0;const total=18;setTimeout(()=>{const iv=setInterval(()=>{ticks++;if(ticks>=total){e.textContent=upper;clearInterval(iv);return}const resolved=Math.floor((ticks/total)*upper.length);let d=upper.substring(0,resolved);for(let i=resolved;i<upper.length;i++){const ch=upper[i];d+=ch===' '?' ':JSALPHA[Math.floor(Math.random()*26)]}e.textContent=d},55)},delay)}
+function jBuildBoard(){
+  const btn=J$('sb-open-btn');if(btn){btn.onmouseover=()=>{btn.style.backgroundColor='#641025'};btn.onmouseout=()=>{btn.style.backgroundColor='#8B1538'}}
+  if(!jBoardFlipped){
+    jBoardFlipped=true;
+    jSbFlipTime('sb-time','08:52',0);jSbFlipDest('sb-dest','Edinburgh Waverley','London Euston',600);jSbFlipPlat('sb-plat','2',1900);jSbFlipStatus('sb-status','On Time',2500);
+    setTimeout(()=>{jSbFlipTime('sb-time-2','10:30',0);jSbFlipDest('sb-dest-2','Glasgow Central','London Euston',400);jSbFlipPlat('sb-plat-2','11',1400);setTimeout(()=>{document.querySelectorAll('#sb-time-2 .sb-fc').forEach(e=>e.classList.add('dim'));document.querySelectorAll('#sb-plat-2 .sb-pc').forEach(e=>e.classList.add('dim'))},2000)},3400);
+    setTimeout(()=>{jSbFlipTime('sb-time-3','11:05',0);jSbFlipDest('sb-dest-3','Manchester Piccadilly','London Euston',400);jSbFlipPlat('sb-plat-3','6',1900);setTimeout(()=>{document.querySelectorAll('#sb-time-3 .sb-fc').forEach(e=>e.classList.add('dim'));document.querySelectorAll('#sb-plat-3 .sb-pc').forEach(e=>e.classList.add('dim'))},2500)},5600);
+  }else{
+    jSbMakeTime('sb-time','08:52','');jSbMakeDest('sb-dest','Edinburgh Waverley','London Euston',false);jSbMakePlat('sb-plat','2','');const st=J$('sb-status');if(st)st.textContent='ON TIME';
+    jSbMakeTime('sb-time-2','10:30','dim');jSbMakeDest('sb-dest-2','Glasgow Central','London Euston',true);jSbMakePlat('sb-plat-2','11','dim');
+    jSbMakeTime('sb-time-3','11:05','dim');jSbMakeDest('sb-dest-3','Manchester Piccadilly','London Euston',true);jSbMakePlat('sb-plat-3','6','dim');
+  }
+}
+function jRenderLobby(){if(JS.screen!=='jlobby')return;const b=J$('j-balance');if(b)b.textContent=JS.balance.toFixed(2)}
+// RTT data
+const JRTT_DATA={"CAR":{name:"Carlisle",n:35,probabilities:{onTime:60,slight:14,mid:12,heavy:14},odds:{onTime:1.55,slight:6.64,mid:7.75,heavy:6.64}},"LAN":{name:"Lancaster",n:35,probabilities:{onTime:26,slight:40,mid:14,heavy:20},odds:{onTime:3.58,slight:2.32,mid:6.64,heavy:4.65}},"PRE":{name:"Preston",n:35,probabilities:{onTime:69,slight:8,mid:3,heavy:20},odds:{onTime:1.35,slight:11.62,mid:31,heavy:4.65}},"CRE":{name:"Crewe",n:35,probabilities:{onTime:46,slight:25,mid:9,heavy:20},odds:{onTime:2.02,slight:3.72,mid:10.33,heavy:4.65}},"STF":{name:"Stafford",n:35,probabilities:{onTime:60,slight:17,mid:6,heavy:17},odds:{onTime:1.55,slight:5.47,mid:15.5,heavy:5.47}},"EUS":{name:"London Euston",n:28,probabilities:{onTime:37,slight:16,mid:10,heavy:37},odds:{onTime:2.51,slight:5.81,mid:9.3,heavy:2.51}}};
+const JCKP_CRS={'Edinburgh Waverley':'EDB','Carlisle':'CAR','Lancaster':'LAN','Preston':'PRE','Crewe':'CRE','Stafford':'STF','London Euston':'EUS'};
+function jGetRTTStats(n){const crs=JCKP_CRS[n];return crs?(JRTT_DATA[crs]||null):null}
+function jRenderRTTPanel(ckpName){const stats=jGetRTTStats(ckpName);if(!stats||!stats.n)return'';const p=stats.probabilities;const o=stats.odds;const bands=[{lbl:'On time',pct:p.onTime,odds:o.onTime},{lbl:'0–2m',pct:p.slight,odds:o.slight},{lbl:'3–5m',pct:p.mid,odds:o.mid},{lbl:'6m+',pct:p.heavy,odds:o.heavy}];const bestIdx=bands.reduce((bi,b,i)=>(b.pct>bands[bi].pct?i:bi),0);return`<div class="rtt-panel"><div class="rtt-panel-hd"><span>Historical performance</span><span>${stats.n} runs · last 14 days</span></div><div class="rtt-grid">${bands.map((b,i)=>`<div class="rtt-cell${i===bestIdx?' best':''}"><div class="rtt-cell-lbl">${b.lbl}</div><div class="rtt-cell-pct">${b.pct}%</div><div class="rtt-cell-odds">${b.odds?b.odds+'×':'—'}</div></div>`).join('')}</div><div class="rtt-avg">Avg delay at ${ckpName.split(' ')[0]}: <b>on time</b></div><div class="rtt-source">Network Rail TRUST · recenttraintimes.co.uk · ${stats.n} runs</div></div>`}
+// Direction market: per-segment recovery probabilities (from RTT data)
+// "Recovering" = delay decreases or stays same at next checkpoint
+// Derived from historical delay profiles per segment
+const JDIR_SEGMENTS={
+  'Carlisle->Lancaster':   {recoverPct:35, name:'Lancaster'},  // delay tends to build Lancaster notorious
+  'Lancaster->Preston':   {recoverPct:62, name:'Preston'},    // Preston often recovers (69% ontime)
+  'Preston->Crewe':       {recoverPct:48, name:'Crewe'},      // fairly even
+  'Crewe->Stafford':      {recoverPct:58, name:'Stafford'},   // slight recovery tendency
+  'Stafford->London Euston':{recoverPct:44, name:'Euston'},   // Euston notorious for late arrivals
+};
+function jDirOdds(segKey){
+  const seg=JDIR_SEGMENTS[segKey];
+  if(!seg)return{recover:2.10,worse:1.85};
+  const pRec=seg.recoverPct/100;
+  const pWorse=1-pRec;
+  const margin=0.93; // 7% house margin
+  return{
+    recover:Math.round((1/pRec)*margin*100)/100,
+    worse:Math.round((1/pWorse)*margin*100)/100
+  };
+}
+function jGetDirectionMarket(){
+  if(!JS.running&&JS.simSec<1)return null;
+  if(JS.lastSettled<1)return null;
+  let nextOpen=null;
+  for(let i=1;i<J.ckps.length;i++){if(jCkpSt(i)==='open'){nextOpen=i;break}}
+  if(nextOpen===null)return null;
+  const currentDelay=jLiveDelay();
+  const nextCkp=J.ckps[nextOpen];
+  const lastCkp=J.ckps[JS.lastSettled];
+  const segKey=lastCkp.name+'->'+nextCkp.name;
+  const odds=jDirOdds(segKey);
+  const alreadyBet=JS.singles.some(b=>b.ckp===nextOpen&&b.type==='direction'&&b.status==='pending');
+  return{nextCkpIdx:nextOpen,nextCkpName:nextCkp.name,currentDelay,segKey,odds,alreadyBet};
+}
+function jRenderSuggestion(){
+  if(JS.tab!=='singles')return;
+  const con=J$('sugg-card');if(!con)return;
+  if(!JS.running&&JS.simSec<1){
+    if(_jSuggDismissed){con.innerHTML='';return}
+    const key='pre';if(key===_jSuggKey)return;_jSuggKey=key;con.innerHTML='';
+    const card=jEl('div','sugg-card pre');
+    card.innerHTML='<div class="sugg-eyebrow red">Before departure</div><div class="sugg-title">Place your first checkpoint bet</div><div class="sugg-body">Betting opens now. First checkpoint closes at Carlisle — place singles before the journey starts.</div><div class="sugg-actions"><button class="sugg-btn-ghost" id="j-sugg-dismiss">Dismiss</button></div>';
+    card.querySelector('#j-sugg-dismiss').addEventListener('click',()=>{_jSuggDismissed=true;con.innerHTML='';_jSuggKey=''});
+    con.appendChild(card);return;
+  }
+  const dm=jGetDirectionMarket();
+  if(!dm){con.innerHTML='';_jSuggKey='';return}
+  const key=JSON.stringify({idx:dm.nextCkpIdx,delay:dm.currentDelay,already:dm.alreadyBet});
+  if(key===_jSuggKey)return;_jSuggKey=key;con.innerHTML='';
+  const delayStr=dm.currentDelay<=0?'On time':'+'+dm.currentDelay+'m late';
+  const card=jEl('div','sugg-card '+(dm.currentDelay>0?'late':'ontime'));
+  if(dm.alreadyBet){
+    card.innerHTML=
+      '<div class="sugg-eyebrow green">Direction bet placed · '+dm.nextCkpName+'</div>'+
+      '<div class="sugg-title">Waiting for settlement</div>'+
+      '<div class="sugg-body">Settles when the train arrives at <b>'+dm.nextCkpName+'</b>.</div>';
+    con.appendChild(card);return;
+  }
+  card.innerHTML=
+    '<div class="sugg-eyebrow '+(dm.currentDelay>0?'late':'green')+'">Direction Market · to '+dm.nextCkpName+'</div>'+
+    '<div class="sugg-title">Currently <b>'+delayStr+'</b></div>'+
+    '<div class="sugg-body" style="margin-bottom:12px">Will the delay get better or worse by <b>'+dm.nextCkpName+'</b>?</div>'+
+    '<div class="j-dir-btns">'+
+      '<button class="j-dir-btn j-dir-worse" id="j-dir-worse"><span class="j-dir-lbl">Getting Worse</span><span class="j-dir-odds">'+dm.odds.worse.toFixed(2)+'×</span></button>'+
+      '<button class="j-dir-btn j-dir-recover" id="j-dir-recover"><span class="j-dir-lbl">Recovering</span><span class="j-dir-odds">'+dm.odds.recover.toFixed(2)+'×</span></button>'+
+    '</div>'+
+    '<div class="sugg-tap-stake" style="margin-top:8px;text-align:left;font-family:var(--mono);font-size:10px;color:var(--steel)">Stake £'+JS.pendingStake.toFixed(2)+' · settles at '+dm.nextCkpName+'</div>';
+  con.appendChild(card);
+  card.querySelector('#j-dir-worse').addEventListener('click',()=>jPlaceDirection(dm,'worse'));
+  card.querySelector('#j-dir-recover').addEventListener('click',()=>jPlaceDirection(dm,'recover'));
+}
+function jPlaceDirection(dm,pick){
+  if(JS.pendingStake>JS.balance){jToast('Insufficient balance','loss');return}
+  const odds=pick==='worse'?dm.odds.worse:dm.odds.recover;
+  JS.balance-=JS.pendingStake;
+  JS.singles.push({id:Date.now()+'_dir',ckp:dm.nextCkpIdx,type:'direction',pick,baselineDelay:dm.currentDelay,stake:JS.pendingStake,odds,status:'pending',payout:0});
+  jToast('Direction bet · £'+JS.pendingStake+' on '+(pick==='worse'?'Getting Worse':'Recovering'));
+  _jSuggKey='';_jBk='';
+}
+// Map
+let jLmap=null,jLTrain=null,jLStations=[];
+function jInitMap(){if(jLmap)return;jLmap=L.map('map-canvas',{zoomControl:true,attributionControl:false}).setView([54.0,-2.6],6);L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{subdomains:'abcd',maxZoom:18}).addTo(jLmap);const coords=J.ckps.map(c=>[c.lat,c.lng]);const line=L.polyline(coords,{color:'#1F2329',weight:4,opacity:.9}).addTo(jLmap);J.ckps.forEach((c,i)=>{const icon=L.divIcon({className:'lf-station',iconSize:[12,12],iconAnchor:[6,6]});const m=L.marker([c.lat,c.lng],{icon}).addTo(jLmap);m.bindTooltip('<b>'+c.name+'</b><br>'+jFmtT(c.sched)+(c.plat?' · Plat '+c.plat:''),{direction:'top',offset:[0,-8]});jLStations.push(m)});jLmap.fitBounds(line.getBounds(),{padding:[40,40]})}
+function openMap(){J$('map-modal').classList.add('open');setTimeout(()=>{jInitMap();if(jLmap)jLmap.invalidateSize();jUpdateMapTrain()},80)}
+function closeMap(){J$('map-modal').classList.remove('open')}
+function jUpdateMapTrain(){if(!jLmap)return;const pos=jTPos();jLStations.forEach((m,i)=>{const e=m.getElement();if(!e)return;if(i<=pos.idx)e.classList.add('passed');else e.classList.remove('passed')});if(!pos.started){if(jLTrain){jLmap.removeLayer(jLTrain);jLTrain=null}J$('map-next').textContent='Awaiting departure';J$('map-delay').textContent='Not yet run';J$('map-delay').className='val';return}const a=J.ckps[pos.idx],b=J.ckps[Math.min(pos.next,J.ckps.length-1)];const[lat,lng]=jLerp(a,b,pos.frac);if(!jLTrain){const icon=L.divIcon({className:'lf-train',html:'🚆',iconSize:[34,34],iconAnchor:[17,17]});jLTrain=L.marker([lat,lng],{icon,zIndexOffset:1000}).addTo(jLmap)}else{jLTrain.setLatLng([lat,lng])}J$('map-next').textContent=pos.arrived?'Arrived at Euston':J.ckps[pos.next].name;const d=jLiveDelay();const de=J$('map-delay');if(d===0){de.textContent='On time';de.className='val'}else if(d<0){de.textContent=Math.abs(d)+'m early';de.className='val'}else{de.textContent=d+'m late';de.className='val late'}}
+function jRenderAudit(){
+  const c=J$('audit-container');c.innerHTML='';const w=jEl('div','audit-wrap');
+  w.innerHTML='<div class="audit-title">Settlement audit log</div><div class="audit-sub">Every checkpoint, what the train did, what band won, and what happened to each bet.</div>';
+  const s1=jEl('div','audit-section');s1.innerHTML='<div class="audit-section-hd">Checkpoint settlements</div>';
+  const t=jEl('table','audit-table');t.innerHTML='<tr><th>Station</th><th>Sched</th><th>Actual</th><th>Delay</th><th>Band won</th><th>Your bet</th><th>Result</th></tr>';
+  J.ckps.forEach((ck,i)=>{if(ck.type==='origin')return;const s=jCkpSt(i);const tr=document.createElement('tr');const wb=s==='settled'?jWinBand(i):null;const myBet=JS.singles.find(b=>b.ckp===i);const dm=Math.round(ck.delay/60);const settleSt=s==='settled'?'Settled':s==='inflight'?'In-flight':'Open';const betBand=myBet?BANDS.find(b=>b.id===myBet.band):null;const betStr=myBet?(betBand.label+' @ '+myBet.odds+'x · £'+myBet.stake):'—';const betResult=myBet?(myBet.status==='won'?'<span class="audit-win">✓ Won +£'+myBet.payout.toFixed(2)+'</span>':myBet.status==='lost'?'<span class="audit-loss">✗ Lost –£'+myBet.stake.toFixed(2)+'</span>':'<span class="audit-pending">Pending</span>'):'—';tr.innerHTML='<td>'+ck.name+'</td><td>'+jFmtT(ck.sched)+'</td><td>'+(s==='settled'?jFmtT(ck.sched+ck.delay):settleSt)+'</td><td>'+(s==='settled'?(dm===0?'On time':dm+'m late'):'—')+'</td><td>'+(wb?wb.label:'—')+'</td><td>'+betStr+'</td><td>'+betResult+'</td>';t.appendChild(tr)});
+  s1.appendChild(t);w.appendChild(s1);
+  const s2=jEl('div','audit-section');s2.innerHTML='<div class="audit-section-hd">Band definitions</div>';
+  const t2=jEl('table','audit-table');t2.innerHTML='<tr><th>Band</th><th>Condition</th><th>Odds</th></tr>';
+  BANDS.forEach(b=>{const conds={ontime:'delay ≤ 0m',slight:'delay 1–2m',mid:'delay 3–5m',heavy:'delay ≥ 6m'};const tr=document.createElement('tr');tr.innerHTML='<td>'+b.label+'</td><td>'+conds[b.id]+'</td><td>'+b.odds+'x</td>';t2.appendChild(tr)});
+  s2.appendChild(t2);w.appendChild(s2);c.appendChild(w);
+}
+function jUpdatePauseBtn(){
+  const btn=J$('sim-pause');if(!btn)return;
+  const hint=J$('jStartHint');
+  if(JS.simSec<1&&!JS.running){
+    btn.textContent='▶ Start';
+    btn.classList.add('j-pulse');
+    if(hint)hint.style.display='flex';
+  }else if(JS.running){
+    btn.textContent='⏸ Pause';
+    btn.classList.remove('j-pulse');
+    if(hint)hint.style.display='none';
+  }else{
+    btn.textContent='▶ Resume';
+    btn.classList.remove('j-pulse');
+    if(hint)hint.style.display='none';
+  }
+}
+function jEnterService(){
+  JS.screen='jservice';jStripBuilt=false;_jBk='';_jSuggKey='';
+  J$('j-lobby').classList.remove('j-active');
+  J$('j-service').classList.add('j-active');
+  JS.selCkp=jFirstOpen();JS.pendingBand=null;
+  J$('tab-singles').style.display='';
+  J$('tab-mybets').style.display='none';
+  J$('tab-audit').style.display='none';
+  document.querySelectorAll('#j-service .tab').forEach(t=>t.classList.remove('active'));
+  const firstTab=document.querySelector('#j-service .tab[data-tab="singles"]');
+  if(firstTab)firstTab.classList.add('active');
+  JS.tab='singles';
+  // Build strip immediately so tracker has rows to update
+  if(!jStripBuilt)jBuildStrip();
+}
+function jGoLobby(){JS.screen='jlobby';J$('j-service').classList.remove('j-active');J$('j-lobby').classList.add('j-active');jBuildBoard()}
+function jResetJourney(){JS.simSec=0;JS.running=false;JS.lastSettled=-1;JS.singles=[];JS.pendingBand=null;JS.balance=100;jStripBuilt=false;_jBk='';_jSuggKey='';_jSuggDismissed=false;if(jLTrain){jLmap.removeLayer(jLTrain);jLTrain=null}jToast('Journey reset')}
+function jToast(msg,kind){const t=J$('j-toast');t.className='j-toast show '+(kind||'');t.textContent=msg;clearTimeout(window._jtt);window._jtt=setTimeout(()=>t.className='j-toast',2600)}
+function jInitIfNeeded(){
+  if(jInited)return;jInited=true;
+  // Wire speed buttons
+  document.querySelectorAll('#j-service .speed-btn').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('#j-service .speed-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');JS.speed=parseInt(b.dataset.spd)})});
+  J$('sim-pause').addEventListener('click',()=>{if(!JS.running)_jSuggDismissed=false;JS.running=!JS.running;jUpdatePauseBtn()});
+  J$('map-trigger-btn').addEventListener('click',openMap);
+  document.querySelectorAll('#j-service .tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('#j-service .tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');JS.tab=t.dataset.tab;J$('tab-singles').style.display=JS.tab==='singles'?'':'none';J$('tab-mybets').style.display=JS.tab==='mybets'?'':'none';J$('tab-audit').style.display=JS.tab==='audit'?'':'none';_jBk=''})});
+  // Load RTT data defaults
+  const o=JRTT_DATA.EUS.odds;if(o.onTime)BANDS[0].odds=o.onTime;if(o.slight)BANDS[1].odds=o.slight;if(o.mid)BANDS[2].odds=o.mid;if(o.heavy)BANDS[3].odds=o.heavy;
+  setTimeout(jBuildBoard,100);
+  jUpdatePauseBtn();
+  requestAnimationFrame(jLoop);
+}
+</script>
+</body>
+</html>
